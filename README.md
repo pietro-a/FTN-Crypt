@@ -37,6 +37,21 @@ This package is provided "as is" and without any express or implied
 warranties, including, without limitation, the implied warranties of
 merchantability and fitness for a particular purpose.
 
+## Installation
+
+Using **cpan**:
+
+```
+$ cpan FTN::Crypt
+```
+
+Manual install:
+
+```
+$ perl Makefile.PL
+$ make
+$ make install
+```
 
 ## References
 
