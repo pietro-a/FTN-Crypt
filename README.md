@@ -39,7 +39,7 @@ merchantability and fitness for a particular purpose.
 
 ## Installation
 
-Using **cpan**:
+Using cpan:
 
 ```
 $ cpan FTN::Crypt
