@@ -1,5 +1,5 @@
 # FTN::Crypt
-Encryption of the FTN messages.
+Perl library for the encryption of the FTN messages.
 
 The possibility of FTN netmail encryption may be sometimes a useful option.
 Corresponding nodelist flag was proposed in FSC-0073.
