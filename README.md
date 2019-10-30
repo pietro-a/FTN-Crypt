@@ -18,6 +18,18 @@ like U,ENCRYPT:PGP5 in his nodelist record.
 
 ```
 use FTN::Crypt;
+
+$cr = FTN::Crypt->new(
+    Nodelist => 'nodelist/NODELIST.*',
+
+    Pubring => '/home/user/.gnupg/pubring.gpg',
+    Secring => '/home/user/.gnupg/secring.gpg',
+);
+
+$cr->encrypt_message(
+    Address => $ftn_address,
+    Message => $msg_raw,
+);
 ```
 
 ## Author
