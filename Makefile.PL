@@ -21,7 +21,7 @@ WriteMakefile(
 		'warnings'       => 0,
 		'FTN::Address'   => '1.04',
 		'FTN::Nodelist'  => '1.08',
-		'Crypt::OpenPGP' => '1.12',
+		'PGP::Finger'    => '1.1',
 	},
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'FTN-Crypt-*' },
