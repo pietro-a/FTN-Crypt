@@ -1,27 +1,41 @@
-use 5.006;
+use 5.010;
 use strict;
 use warnings;
 use ExtUtils::MakeMaker;
 
-my %WriteMakefileArgs = (
-    NAME             => 'FTN::Crypt',
-    AUTHOR           => q{Petr Antonov <petr@antonov.space>},
-    VERSION_FROM     => 'lib/FTN/Crypt.pm',
-    ABSTRACT_FROM    => 'lib/FTN/Crypt.pm',
-    LICENSE          => 'artistic_2',
-    MIN_PERL_VERSION => '5.006',
+WriteMakefile(
+	NAME             => 'FTN::Crypt',
+	VERSION_FROM     => 'lib/FTN/Crypt.pm',
+	ABSTRACT_FROM    => 'lib/FTN/Crypt.pm',
+	AUTHOR           => 'Petr Antonov',
+	LICENSE          => 'perl',
+	MIN_PERL_VERSION => '5.010',
     CONFIGURE_REQUIRES => {
         'ExtUtils::MakeMaker' => '0',
     },
     TEST_REQUIRES => {
         'Test::More' => '0',
     },
-    PREREQ_PM => {
-        #'ABC'              => '1.6',
-        #'Foo::Bar::Module' => '5.0401',
-    },
+	PREREQ_PM        => {
+		'strict'         => 0,
+		'warnings'       => 0,
+		'FTN::Address'   => '1.04',
+		'FTN::Nodelist'  => '1.08',
+		'Crypt::OpenPGP' => '1.12',
+	},
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'FTN-Crypt-*' },
+	(eval { ExtUtils::MakeMaker->VERSION(6.46) } ? (META_MERGE => {
+		  'meta-spec' => { version => 2 },
+		  resources => {
+			  repository => {
+				  type => 'git',
+				  url  => 'https://github.com/pietro-a/FTN-Crypt.git',
+				  web  => 'https://github.com/pietro-a/FTN-Crypt',
+			  },
+		  }})
+		: ()
+	),
 );
 
 # Compatibility with old versions of ExtUtils::MakeMaker
