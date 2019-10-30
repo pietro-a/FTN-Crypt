@@ -7,6 +7,10 @@
 # of the licenses at https://opensource.org/licenses/Artistic-1.0, and
 # http://www.gnu.org/licenses/gpl-2.0.html.
 #
+# This package is provided "as is" and without any express or implied
+# warranties, including, without limitation, the implied warranties of
+# merchantability and fitness for a particular purpose.
+#
 
 package FTN::Crypt::Constants;
 
