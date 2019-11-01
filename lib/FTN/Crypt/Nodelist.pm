@@ -64,7 +64,7 @@ sub get_email_addr {
     return unless $FTN::Crypt::Constants::ENC_METHODS{$flags{$FTN::Crypt::Constants::ENC_NODELIST_FLAG}};
     
     my $addr = FTN::Address->new($node->address);
-    return "<$self->{_username}@" . $addr->fqdn, $flags{$FTN::Crypt::Constants::ENC_NODELIST_FLAG} . '>';
+    return "<$self->{_username}@" . $addr->fqdn . '>', $flags{$FTN::Crypt::Constants::ENC_NODELIST_FLAG};
 }
 
 1;
