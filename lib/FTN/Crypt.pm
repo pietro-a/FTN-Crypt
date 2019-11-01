@@ -44,7 +44,7 @@ my $GPG2_BVER = '2.1.0';
 sub new {
     my ($class, %opts) = @_;
 
-    die "No options specified" unless %opts;
+    croak "No options specified" unless %opts;
 
     my $self = {
         nodelist => FTN::Crypt::Nodelist->new(
@@ -344,9 +344,6 @@ FTN::Crypt - Encryption of the FTN messages.
 
     $cr = FTN::Crypt->new(
         Nodelist => 'nodelist/NODELIST.*',
-
-        Pubring => '/home/user/.gnupg/pubring.gpg',
-        Secring => '/home/user/.gnupg/secring.gpg',
     );
     
     $cr->encrypt_message(
