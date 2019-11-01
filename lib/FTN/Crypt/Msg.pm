@@ -69,7 +69,8 @@ sub _check_kludge {
 
 #----------------------------------------------------------------------#
 sub add_kludge {
-    my ($self, $kludge, $area) = @_;
+    my $self = shift;
+    my ($kludge, $area) = @_;
 
     ($kludge, $area) = _check_kludge($kludge, $area);
 
