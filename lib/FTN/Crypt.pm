@@ -26,7 +26,6 @@ use FTN::Crypt::Constants;
 use FTN::Crypt::Msg;
 use FTN::Crypt::Nodelist;
 
-use GnuPG::Handles;
 use GnuPG::Interface;
 
 use IO::Handle;
