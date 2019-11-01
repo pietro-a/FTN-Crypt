@@ -8,9 +8,6 @@ FTN::Crypt - Encryption of the FTN messages.
 
     $cr = FTN::Crypt->new(
         Nodelist => 'nodelist/NODELIST.*',
-
-        Pubring => '/home/user/.gnupg/pubring.gpg',
-        Secring => '/home/user/.gnupg/secring.gpg',
     );
     
     $cr->encrypt_message(

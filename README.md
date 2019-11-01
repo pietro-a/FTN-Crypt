@@ -21,9 +21,6 @@ use FTN::Crypt;
 
 $cr = FTN::Crypt->new(
     Nodelist => 'nodelist/NODELIST.*',
-
-    Pubring => '/home/user/.gnupg/pubring.gpg',
-    Secring => '/home/user/.gnupg/secring.gpg',
 );
 
 $cr->encrypt_message(
