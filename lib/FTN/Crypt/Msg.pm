@@ -18,7 +18,7 @@ use strict;
 use warnings;
 use 5.010;
 
-use Carp;
+use base qw/FTN::Crypt::Error/;
 
 use FTN::Address;
 
@@ -35,9 +35,18 @@ my %KLUDGE_AREAS = (
 sub new {
     my ($class, %opts) = @_;
 
-    croak "No options specified" unless %opts;
-    croak "No address specified" unless $opts{Address};
-    croak "No message specified" unless $opts{Message};
+    unless (%opts) {
+        $class->set_error('No options specified');
+        return;
+    }
+    unless ($opts{Address}) {
+        $class->set_error('No address specified');
+        return;
+    }
+    unless ($opts{Message}) {
+        $class->set_error('No message specified');
+        return;
+    }
 
     my $self = {
         msg => {
@@ -49,22 +58,37 @@ sub new {
 
     $self = bless $self, $class;
 
-    $self->set_address($opts{Address});
-    $self->set_message($opts{Message});
+    $self->set_address($opts{Address}) or return;
+    $self->set_message($opts{Message}) or return;
 
     return $self;
 }
 
 #----------------------------------------------------------------------#
 sub _check_kludge {
-    my ($kludge, $area) = @_;
+    my $self = shift;
+    my ($kludge) = @_;
+
+    unless (defined $kludge && $kludge ne "") {
+        $self->set_error('Kludge is empty');
+        return;
+    }
+
+    return $kludge;
+}
+
+#----------------------------------------------------------------------#
+sub _check_area {
+    my $self = shift;
+    my ($area) = @_;
 
     $area = $DEFAULT_KLUDGE_AREA unless defined $area;
-    croak "Invalid kludge area" unless $KLUDGE_AREAS{$area};
+    unless ($KLUDGE_AREAS{$area}) {
+        $self->set_error("Invalid kludge area ($area)");
+        return;
+    }
 
-    croak "Kludge is empty" unless defined $kludge && $kludge ne "";
-
-    return $kludge, $area;
+    return $area;
 }
 
 #----------------------------------------------------------------------#
@@ -72,9 +96,16 @@ sub add_kludge {
     my $self = shift;
     my ($kludge, $area) = @_;
 
-    ($kludge, $area) = _check_kludge($kludge, $area);
+    $kludge = $self->_check_kludge($kludge);
+    $area = $self->_check_area($area);
 
-    push @{$self->{msg}->{$area}}, $kludge;
+    if (defined $kludge && defined $area) {
+        push @{$self->{msg}->{$area}}, $kludge;
+    } else {
+        return;
+    }
+
+    return 1;
 }
 
 #----------------------------------------------------------------------#
@@ -82,10 +113,17 @@ sub remove_kludge {
     my $self = shift;
     my ($kludge, $area) = @_;
 
-    ($kludge, $area) = _check_kludge($kludge, $area);
+    $kludge = $self->_check_kludge($kludge);
+    $area = $self->_check_area($area);
 
-    @{$self->{msg}->{$area}} = grep { !/^${kludge}(?::?\s.+)*$/ }
-                               @{$self->{msg}->{$area}};
+    if (defined $kludge && defined $area) {
+        @{$self->{msg}->{$area}} = grep { !/^${kludge}(?::?\s.+)*$/ }
+                                   @{$self->{msg}->{$area}};
+    } else {
+        return;
+    }
+
+    return 1;
 }
 
 #----------------------------------------------------------------------#
@@ -93,8 +131,8 @@ sub get_kludges {
     my $self = shift;
     my ($area) = @_;
 
-    $area = $DEFAULT_KLUDGE_AREA unless defined $area;
-    croak "Invalid kludge area" unless $KLUDGE_AREAS{$area};
+    $area = $self->_check_area($area);
+    return unless $area;
 
     return $self->{msg}->{$area};
 }
@@ -102,8 +140,14 @@ sub get_kludges {
 #----------------------------------------------------------------------#
 sub get_address {
     my $self = shift;
-    
-    return $self->{addr}->get;
+
+    my $addr = $self->{addr}->get;
+    unless ($addr) {
+        $self->set_error($@);
+        return;
+    }
+
+    return $addr;
 }
 
 #----------------------------------------------------------------------#
@@ -135,8 +179,14 @@ sub get_message {
 sub set_address {
     my $self = shift;
     my ($addr) = @_;
-    
-    $self->{addr} = FTN::Address->new($addr) or croak $!;
+
+    $self->{addr} = FTN::Address->new($addr);
+    unless ($self->{addr}) {
+        $self->set_error($@);
+        return;
+    }
+
+    return 1;
 }
 
 #----------------------------------------------------------------------#
@@ -146,6 +196,8 @@ sub set_text {
 
     $text =~ s/\n/\r/g;
     $self->{msg}->{TEXT} = $text;
+
+    return 1;
 }
 
 #----------------------------------------------------------------------#
@@ -168,6 +220,8 @@ sub set_message {
         }
     }
     $self->{msg}->{TEXT} = join "\r", @text;
+
+    return 1;
 }
 
 1;
