@@ -21,12 +21,18 @@ use FTN::Crypt;
 
 $cr = FTN::Crypt->new(
     Nodelist => 'nodelist/NODELIST.*',
-);
+) or die FTN::Crypt->error;
 
-$cr->encrypt_message(
+$msg_enc = $cr->encrypt_message(
     Address => $ftn_address,
     Message => $msg_raw,
-);
+) or die $cr->error;
+
+$msg_dec = $cr->decrypt_message(
+    Address    => $ftn_address,
+    Message    => $msg_enc,
+    Passphrase => $passphrase,
+) or die $cr->error;
 ```
 
 ## Author
