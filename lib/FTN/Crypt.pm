@@ -18,9 +18,9 @@ use strict;
 use warnings;
 use 5.010;
 
-our $VERSION = '0.2.0';
+use base qw/FTN::Crypt::Error/;
 
-use Carp;
+our $VERSION = '0.2.5';
 
 use FTN::Crypt::Constants;
 use FTN::Crypt::Msg;
@@ -44,7 +44,10 @@ my $GPG2_BVER = '2.1.0';
 sub new {
     my ($class, %opts) = @_;
 
-    croak "No options specified" unless %opts;
+    unless (%opts) {
+        $class->set_error('No options specified');
+        return;
+    }
 
     my $self = {
         keyserver_url => $opts{Keyserver} ? $opts{Keyserver} : $DEFAULT_KEYSERVER_URL,
@@ -55,7 +58,8 @@ sub new {
         Nodelist => $opts{Nodelist},
     );
     unless ($self->{nodelist}) {
-        croak(FTN::Crypt::Nodelist->error);
+        $class->set_error(FTN::Crypt::Nodelist->error);
+        return;
     }
 
     $self->{gnupg}->options->hash_init(
@@ -151,8 +155,14 @@ sub decrypt_message {
     my $self = shift;
     my (%opts) = @_;
 
-    croak "No options specified" unless %opts;
-    croak "No passphrase specified" unless defined $opts{Passphrase};
+    unless (%opts) {
+        $self->set_error('No options specified');
+        return;
+    }
+    unless (defined $opts{Passphrase}) {
+        $self->set_error('No passphrase specified');
+        return;
+    }
 
     my $msg = FTN::Crypt::Msg->new(
         Address => $opts{Address},
@@ -254,7 +264,7 @@ sub _lookup_key {
 sub _import_key {
     my ($self, $uid) = @_;
 
-    return 0 if $self->_lookup_key($uid);
+    return if $self->_lookup_key($uid);
 
     my $res;
 
@@ -272,7 +282,7 @@ sub _import_key {
         );
         $res = $finger->fetch($uid);
     } catch {
-        return 0;
+        return;
     };
 
     if ($res) {
@@ -298,7 +308,7 @@ sub _import_key {
         return 1;
     }
 
-    return 0;
+    return;
 }
 
 #----------------------------------------------------------------------#
