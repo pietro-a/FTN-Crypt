@@ -45,9 +45,9 @@ sub error {
     my $self = shift;
 
     if (ref($self)) {
-        return $self->{_ERROR_};
+        return defined $self->{_ERROR_} ? $self->{_ERROR_} : '';
     } else {
-        return $_ERROR_;
+        return defined $_ERROR_ ? $_ERROR_ : '';
     }
 }
 

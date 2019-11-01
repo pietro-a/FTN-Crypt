@@ -58,8 +58,14 @@ sub new {
 
     $self = bless $self, $class;
 
-    $self->set_address($opts{Address}) or return;
-    $self->set_message($opts{Message}) or return;
+    unless ($self->set_address($opts{Address})) {
+        $class->set_error($self->error);
+        return;
+    }
+    unless ($self->set_message($opts{Message})) {
+        $class->set_error($self->error);
+        return;
+    }
 
     return $self;
 }

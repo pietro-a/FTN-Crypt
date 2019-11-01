@@ -84,16 +84,17 @@ sub encrypt_message {
         Address => $opts{Address},
         Message => $opts{Message},
     );
+    unless ($msg) {
+        $self->set_error(FTN::Crypt::Msg->error);
+        return;
+    }
 
-    my $res = {
-        ok => 0,
-        msg => '',
-    };
+    my $res;
 
     my ($addr, $method) = $self->{nodelist}->get_email_addr($msg->get_address);
     unless ($addr) {
-        $res->{msg} = 'Encryption-capable address not found: ' . $self->{nodelist}->error;
-        return $res;
+        $self->set_error('Encryption-capable address not found', $self->{nodelist}->error);
+        return;
     }
 
     my $gnupg_ver = $self->{gnupg}->version;
@@ -101,16 +102,16 @@ sub encrypt_message {
         if (version->parse($gnupg_ver) < version->parse($GPG2_BVER)) {
             $self->{gnupg}->options->meta_pgp_2_compatible(1);
         } else {
-            $res->{msg} = "GnuPG is too new (ver. $gnupg_ver), can't ensure required encryption method ($method)";
-            return $res;
+            $self->set_error("GnuPG is too new (ver. $gnupg_ver), can't ensure required encryption method ($method)");
+            return;
         }
     } elsif ($method eq 'PGP5') {
         $self->{gnupg}->options->meta_pgp_5_compatible(1);
     }
 
     unless ($self->_lookup_key($addr) || $self->_import_key($addr)) {
-        $res->{msg} = "PGP key for $addr not found";
-        return $res;
+        $self->set_error("PGP key for $addr not found");
+        return;
     }
     
     my $key_id = $self->_select_key($addr);
@@ -138,13 +139,23 @@ sub encrypt_message {
     waitpid $pid, 0;
 
     if ($msg_enc) {
-        $res->{ok} = 1;
-        $msg->set_text($msg_enc);
-        $msg->add_kludge("$FTN::Crypt::Constants::ENC_MESSAGE_KLUDGE: $method");
-        $res->{msg} = $msg->get_message;
+        unless ($msg->set_text($msg_enc)) {
+            $self->set_error("Can't write message text", $msg->error);
+            return;
+        }
+        unless ($msg->add_kludge("$FTN::Crypt::Constants::ENC_MESSAGE_KLUDGE: $method")) {
+            $self->set_error("Can't modify message kludges", $msg->error);
+            return;
+        }
+        
+        $res = $msg->get_message;
+        unless ($res) {
+            $self->set_error("Can't get message", $msg->error);
+            return;
+        }
     } else {
-        $res->{msg} = 'Message enccryption failed';
-        return $res;
+        $self->set_error('Message enccryption failed');
+        return;
     }
 
     return $res;
@@ -168,31 +179,35 @@ sub decrypt_message {
         Address => $opts{Address},
         Message => $opts{Message},
     );
+    unless ($msg) {
+        $self->set_error(FTN::Crypt::Msg->error);
+        return;
+    }
 
-    my $res = {
-        ok => 0,
-        msg => '',
-    };
+    my $res;
 
     my $method_used;
     foreach my $k (@{$msg->get_kludges}) {
         $method_used = $1 if $k =~ /^$FTN::Crypt::Constants::ENC_MESSAGE_KLUDGE:\s+(\w+)$/;
     }
-
     unless ($method_used) {
-        $res->{msg} = "Message seems not to be encrypted";
-        return $res;
+        $self->set_error('Message seems not to be encrypted');
+        return;
     }
 
     my ($addr, $method) = $self->{nodelist}->get_email_addr($msg->get_address);
     unless ($addr) {
-        $res->{msg} = 'Encryption-capable address not found';
-        return $res;
+        $self->set_error('Encryption-capable address not found', $self->{nodelist}->error);
+        return;
+    }
+    unless ($method) {
+        $self->set_error('Encryption method not found', $self->{nodelist}->error);
+        return;
     }
 
     if ($method ne $method_used) {
-        $res->{msg} = "Message is encrypted with $method_used while node uses $method";
-        return $res;
+        $self->set_error("Message is encrypted with $method_used while node uses $method");
+        return;
     }
 
     my ($in_fh, $out_fh, $err_fh, $pass_fh) = (IO::Handle->new(),
@@ -221,13 +236,23 @@ sub decrypt_message {
     waitpid $pid, 0;
 
     if ($msg_dec) {
-        $res->{ok} = 1;
-        $msg->set_text($msg_dec);
-        $msg->remove_kludge($FTN::Crypt::Constants::ENC_MESSAGE_KLUDGE);
-        $res->{msg} = $msg->get_message;
+        unless ($msg->set_text($msg_dec)) {
+            $self->set_error("Can't write message text", $msg->error);
+            return;
+        }
+        unless ($msg->remove_kludge($FTN::Crypt::Constants::ENC_MESSAGE_KLUDGE)) {
+            $self->set_error("Can't modify message kludges", $msg->error);
+            return;
+        }
+
+        $res = $msg->get_message;
+        unless ($res) {
+            $self->set_error("Can't get message", $msg->error);
+            return;
+        }
     } else {
-        $res->{msg} = 'Message decryption failed';
-        return $res;
+        $self->set_error('Message decryption failed');
+        return;
     }
 
     return $res;
