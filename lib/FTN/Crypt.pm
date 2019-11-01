@@ -88,7 +88,7 @@ sub encrypt_message {
 
     my ($addr, $method) = $self->{nodelist}->get_email_addr($msg->get_address);
     unless ($addr) {
-        $res->{msg} = 'Encryption-capable address not found';
+        $res->{msg} = 'Encryption-capable address not found: ' . $self->{nodelist}->error;
         return $res;
     }
 
