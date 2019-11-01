@@ -47,12 +47,16 @@ sub new {
     croak "No options specified" unless %opts;
 
     my $self = {
-        nodelist => FTN::Crypt::Nodelist->new(
-            Nodelist => $opts{Nodelist},
-        ),
         keyserver_url => $opts{Keyserver} ? $opts{Keyserver} : $DEFAULT_KEYSERVER_URL,
         gnupg         => GnuPG::Interface->new(),
     };
+
+    $self->{nodelist} = FTN::Crypt::Nodelist->new(
+        Nodelist => $opts{Nodelist},
+    );
+    unless ($self->{nodelist}) {
+        croak(FTN::Crypt::Nodelist->error);
+    }
 
     $self->{gnupg}->options->hash_init(
         armor            => 1,
@@ -69,7 +73,8 @@ sub new {
 
 #----------------------------------------------------------------------#
 sub encrypt_message {
-    my ($self, %opts) = @_;
+    my $self = shift;
+    my (%opts) = @_;
 
     my $msg = FTN::Crypt::Msg->new(
         Address => $opts{Address},
@@ -143,7 +148,8 @@ sub encrypt_message {
 
 #----------------------------------------------------------------------#
 sub decrypt_message {
-    my ($self, %opts) = @_;
+    my $self = shift;
+    my (%opts) = @_;
 
     croak "No options specified" unless %opts;
     croak "No passphrase specified" unless defined $opts{Passphrase};
@@ -219,7 +225,8 @@ sub decrypt_message {
 
 #----------------------------------------------------------------------#
 sub _lookup_key {
-    my ($self, $uid) = @_;
+    my $self = shift;
+    my ($uid) = @_;
     
     my ($out_fh, $err_fh) = (IO::Handle->new(), IO::Handle->new());
      
