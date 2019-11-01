@@ -78,7 +78,8 @@ sub add_kludge {
 
 #----------------------------------------------------------------------#
 sub remove_kludge {
-    my ($self, $kludge, $area) = @_;
+    my $self = shift;
+    my ($kludge, $area) = @_;
 
     ($kludge, $area) = _check_kludge($kludge, $area);
 
@@ -88,7 +89,8 @@ sub remove_kludge {
 
 #----------------------------------------------------------------------#
 sub get_kludges {
-    my ($self, $area) = @_;
+    my $self = shift;
+    my ($area) = @_;
 
     $area = $DEFAULT_KLUDGE_AREA unless defined $area;
     croak "Invalid kludge area" unless $KLUDGE_AREAS{$area};
@@ -98,14 +100,14 @@ sub get_kludges {
 
 #----------------------------------------------------------------------#
 sub get_address {
-    my ($self) = @_;
+    my $self = shift;
     
     return $self->{addr}->get;
 }
 
 #----------------------------------------------------------------------#
 sub get_text {
-    my ($self) = @_;
+    my $self = shift;
 
     my $text = $self->{msg}->{TEXT};
     $text =~ s/\r/\n/g;
@@ -115,7 +117,7 @@ sub get_text {
 
 #----------------------------------------------------------------------#
 sub get_message {
-    my ($self) = @_;
+    my $self = shift;
 
     my @msg;
 
@@ -130,14 +132,16 @@ sub get_message {
 
 #----------------------------------------------------------------------#
 sub set_address {
-    my ($self, $addr) = @_;
+    my $self = shift;
+    my ($addr) = @_;
     
     $self->{addr} = FTN::Address->new($addr) or croak $!;
 }
 
 #----------------------------------------------------------------------#
 sub set_text {
-    my ($self, $text) = @_;
+    my $self = shift;
+    my ($text) = @_;
 
     $text =~ s/\n/\r/g;
     $self->{msg}->{TEXT} = $text;
@@ -145,7 +149,8 @@ sub set_text {
 
 #----------------------------------------------------------------------#
 sub set_message {
-    my ($self, $msg) = @_;
+    my $self = shift;
+    my ($msg) = @_;
     
     my @msg_lines = split /\r/, $msg;
     my $found_text = 0;
