@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use ExtUtils::MakeMaker;
 
-WriteMakefile(
+my %WriteMakefileArgs =(
 	NAME             => 'FTN::Crypt',
 	VERSION_FROM     => 'lib/FTN/Crypt.pm',
 	ABSTRACT_FROM    => 'lib/FTN/Crypt.pm',
@@ -23,7 +23,7 @@ WriteMakefile(
 		'IO::Handle'       => '1.35',
 		'FTN::Address'     => '1.04',
 		'FTN::Nodelist'    => '1.08',
-		'Gnupg::Interface' => '0.52',
+		'GnuPG::Interface' => '0.52',
 		'PGP::Finger'      => '1.1',
 	},
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
