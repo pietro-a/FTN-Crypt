@@ -20,14 +20,69 @@ use 5.010;
 
 use base qw/FTN::Crypt::Error/;
 
+#----------------------------------------------------------------------#
+
+=head1 NAME
+
+FTN::Crypt::Nodelist - Nodelist processing for the L<FTN::Crypt> module.
+
+=head1 SYNOPSIS
+
+    use FTN::Crypt::Nodelist;
+
+    my $ndl = FTN::Crypt::Nodelist->new(
+        Nodelist => 'nodelist/NODELIST.*',
+        Username => 'user', # optional, defaults to 'sysop'
+    );
+    my ($addr, $method) = $ndl->get_email_addr('2:5020/1');
+
+=cut
+
+#----------------------------------------------------------------------#
+
 use FTN::Address;
 use FTN::Crypt::Constants;
 use FTN::Nodelist;
 
 #----------------------------------------------------------------------#
+
 my $DEFAULT_USERNAME = 'sysop';
 
 #----------------------------------------------------------------------#
+
+=head1 METHODS
+
+=cut
+
+#----------------------------------------------------------------------#
+
+=head2 new()
+
+Constructor.
+
+=head3 Parameters:
+
+=over 4
+
+=item * C<Nodelist>: Path to nodelist file. If contains wildcard, file with maximum number in digital extension will be selected.
+
+=item * B<Optional> C<Username>: Username part in email address, which corresponds to the FTN one, defaults to 'sysop'.
+
+=back
+
+=head3 Returns:
+
+Created object or error in C<FTN::Crypt::Nodelist-E<gt>error>.
+
+Sample:
+
+    my $obj = FTN::Crypt::Nodelist->new(
+        Nodelist => 'nodelist/NODELIST.*',
+        Username => 'user', # optional, defaults to 'sysop'
+    );
+
+=cut
+
 sub new {
     my ($class, %opts) = @_;
 
@@ -63,6 +118,29 @@ sub new {
 }
 
 #----------------------------------------------------------------------#
+
+=head2 get_email_addr()
+
+If recipient supports PGP encryption, get recipient's email address and encryption method.
+
+=head3 Parameters:
+
+=over 4
+
+=item * Recipient's FTN address.
+
+=back
+
+=head3 Returns:
+
+Recipient's email address and encryption method or error in C<$obj-E<gt>error>.
+
+Sample:
+
+    my ($addr, $method) = $obj->get_email_addr('99:8877/1') or die $obj->error;
+
+=cut
+
 sub get_email_addr {
     my $self = shift;
     my ($ftn_addr) = @_;
@@ -101,20 +179,6 @@ sub get_email_addr {
 
 1;
 __END__
-
-=head1 NAME
-
-FTN::Crypt::Nodelist - Nodelist processing for the L<FTN::Crypt> module.
-
-=head1 SYNOPSIS
-
-    use FTN::Crypt::Nodelist;
-
-    my $ndl = FTN::Crypt::Nodelist->new(
-        Nodelist => 'nodelist/NODELIST.*',
-        Username => 'user', # optional, defaults to 'sysop'
-    );
-    my ($addr, $method) = $ndl->get_email_addr('2:5020/1');
 
 =head1 AUTHOR
 

@@ -20,9 +20,34 @@ use 5.010;
 
 use base qw/FTN::Crypt::Error/;
 
+#----------------------------------------------------------------------#
+
+=head1 NAME
+
+FTN::Crypt::Msg - Message parsing for the L<FTN::Crypt> module.
+
+=head1 SYNOPSIS
+
+    use FTN::Crypt::Msg;
+
+    my $msg = FTN::Crypt::Msg->new(
+        Address => $ftn_address,
+        Message => $msg_src,
+    );
+    $msg->add_kludge('ENC: PGP5');
+    $msg->remove_kludge('ENC');
+    my $text = $msg->get_text;
+    my $kludges = $msg->get_kludges;
+    my $msg_raw = $msg->get_message;
+
+=cut
+
+#----------------------------------------------------------------------#
+
 use FTN::Address;
 
 #----------------------------------------------------------------------#
+
 my $SOH = chr(1);
 
 my $DEFAULT_KLUDGE_AREA = 'HEADER';
@@ -32,6 +57,40 @@ my %KLUDGE_AREAS = (
 );
 
 #----------------------------------------------------------------------#
+
+=head1 METHODS
+
+=cut
+
+#----------------------------------------------------------------------#
+
+=head2 new()
+
+Constructor.
+
+=head3 Parameters:
+
+=over 4
+
+=item * C<Address>: Recipient's FTN address.
+
+=item * C<Message>: Raw FTN message.
+
+=back
+
+=head3 Returns:
+
+Created object or error in C<FTN::Crypt::Msg-E<gt>error>.
+
+Sample:
+
+    my $obj = FTN::Crypt::Msg->new(
+        Address => $ftn_address,
+        Message => $msg,
+    ) or die FTN::Crypt::Msg->error;
+
+=cut
+
 sub new {
     my ($class, %opts) = @_;
 
@@ -71,6 +130,7 @@ sub new {
 }
 
 #----------------------------------------------------------------------#
+
 sub _check_kludge {
     my $self = shift;
     my ($kludge) = @_;
@@ -84,6 +144,7 @@ sub _check_kludge {
 }
 
 #----------------------------------------------------------------------#
+
 sub _check_area {
     my $self = shift;
     my ($area) = @_;
@@ -98,6 +159,31 @@ sub _check_area {
 }
 
 #----------------------------------------------------------------------#
+
+=head2 add_kludge()
+
+Add kludge to the message.
+
+=head3 Parameters:
+
+=over 4
+
+=item * Kludge string.
+
+=item * B<Optional> C<[HEADER|FOOTER]> Whether to add kludge to the beginning or end of the message, defaults to HEADER.
+
+=back
+
+=head3 Returns:
+
+True or error in C<$obj-E<gt>error>.
+
+Sample:
+
+    $obj->add_kludge('ENC: PGP5') or die $obj->error;
+
+=cut
+
 sub add_kludge {
     my $self = shift;
     my ($kludge, $area) = @_;
@@ -115,6 +201,31 @@ sub add_kludge {
 }
 
 #----------------------------------------------------------------------#
+
+=head2 remove_kludge()
+
+Remove kludge from the message.
+
+=head3 Parameters:
+
+=over 4
+
+=item * Kludge string, may be only the first part of the composite kludge.
+
+=item * B<Optional> C<[HEADER|FOOTER]> Whether to remove kludge from the beginning or end of the message, defaults to HEADER.
+
+=back
+
+=head3 Returns:
+
+True or error in C<$obj-E<gt>error>.
+
+Sample:
+
+    $obj->remove_kludge('ENC') or die $obj->error;
+
+=cut
+
 sub remove_kludge {
     my $self = shift;
     my ($kludge, $area) = @_;
@@ -133,6 +244,29 @@ sub remove_kludge {
 }
 
 #----------------------------------------------------------------------#
+
+=head2 get_kludges()
+
+Get message kludges.
+
+=head3 Parameters:
+
+=over 4
+
+=item * B<Optional> C<[HEADER|FOOTER]> Whether to get kludges from the beginning or end of the message, defaults to HEADER.
+
+=back
+
+=head3 Returns:
+
+Arrayref with kludges list or error in C<$obj-E<gt>error>.
+
+Sample:
+
+    $obj->get_kludges() or die $obj->error;
+
+=cut
+
 sub get_kludges {
     my $self = shift;
     my ($area) = @_;
@@ -144,6 +278,25 @@ sub get_kludges {
 }
 
 #----------------------------------------------------------------------#
+
+=head2 get_address()
+
+Get recipient's FTN address.
+
+=head3 Parameters:
+
+None.
+
+=head3 Returns:
+
+Recipient's FTN address or error in C<$obj-E<gt>error>.
+
+Sample:
+
+    my $ftn_address = $obj->get_address() or die $obj->error;
+
+=cut
+
 sub get_address {
     my $self = shift;
 
@@ -157,6 +310,62 @@ sub get_address {
 }
 
 #----------------------------------------------------------------------#
+
+=head2 set_address()
+
+Set recipient's FTN address.
+
+=head3 Parameters:
+
+=over 4
+
+=item * Recipient's FTN address.
+
+=back
+
+=head3 Returns:
+
+True or error in C<$obj-E<gt>error>.
+
+Sample:
+
+    $obj->set_address($ftn_address)
+
+=cut
+
+sub set_address {
+    my $self = shift;
+    my ($addr) = @_;
+
+    $self->{addr} = FTN::Address->new($addr);
+    unless ($self->{addr}) {
+        $self->set_error($@);
+        return;
+    }
+
+    return 1;
+}
+
+#----------------------------------------------------------------------#
+
+=head2 get_text()
+
+Get text part of the message.
+
+=head3 Parameters:
+
+None.
+
+=head3 Returns:
+
+Text part of the message or error in C<$obj-E<gt>error>.
+
+Sample:
+
+    my $text = $obj->get_text() or die $obj->error;
+
+=cut
+
 sub get_text {
     my $self = shift;
 
@@ -167,6 +376,59 @@ sub get_text {
 }
 
 #----------------------------------------------------------------------#
+
+=head2 set_text()
+
+Set text part of the message.
+
+=head3 Parameters:
+
+=over 4
+
+=item * Text part of the message.
+
+=back
+
+=head3 Returns:
+
+True or error in C<$obj-E<gt>error>.
+
+Sample:
+
+    $obj->set_text($text) or die $obj->error;
+
+=cut
+
+sub set_text {
+    my $self = shift;
+    my ($text) = @_;
+
+    $text =~ s/\n/\r/g;
+    $self->{msg}->{TEXT} = $text;
+
+    return 1;
+}
+
+#----------------------------------------------------------------------#
+
+=head2 get_message()
+
+Get raw message.
+
+=head3 Parameters:
+
+None.
+
+=head3 Returns:
+
+Raw message or error in C<$obj-E<gt>error>.
+
+Sample:
+
+    my $msg = $obj->get_message() or die $obj->error;
+
+=cut
+
 sub get_message {
     my $self = shift;
 
@@ -182,31 +444,29 @@ sub get_message {
 }
 
 #----------------------------------------------------------------------#
-sub set_address {
-    my $self = shift;
-    my ($addr) = @_;
 
-    $self->{addr} = FTN::Address->new($addr);
-    unless ($self->{addr}) {
-        $self->set_error($@);
-        return;
-    }
+=head2 set_message()
 
-    return 1;
-}
+Set raw message.
 
-#----------------------------------------------------------------------#
-sub set_text {
-    my $self = shift;
-    my ($text) = @_;
+=head3 Parameters:
 
-    $text =~ s/\n/\r/g;
-    $self->{msg}->{TEXT} = $text;
+=over 4
 
-    return 1;
-}
+=item * Raw message.
 
-#----------------------------------------------------------------------#
+=back
+
+=head3 Returns:
+
+True or error in C<$obj-E<gt>error>.
+
+Sample:
+
+    $obj->set_message($msg) or die $obj->error;
+
+=cut
+
 sub set_message {
     my $self = shift;
     my ($msg) = @_;
@@ -233,24 +493,6 @@ sub set_message {
 1;
 __END__
 
-=head1 NAME
-
-FTN::Crypt::Msg - Message parsing for the L<FTN::Crypt> module.
-
-=head1 SYNOPSIS
-
-    use FTN::Crypt::Msg;
-
-    my $msg = FTN::Crypt::Msg->new(
-        Address => $ftn_address,
-        Message => $msg_src,
-    );
-    $msg->add_kludge('ENC: PGP5');
-    $msg->remove_kludge('ENC');
-    my $text = $msg->get_text;
-    my $kludges = $msg->get_kludges;
-    my $msg_raw = $msg->get_message;
-
 =head1 AUTHOR
 
 Petr Antonov, E<lt>petr _at_ antonov _dot_ spaceE<gt>
@@ -267,3 +509,5 @@ L<http://www.gnu.org/licenses/gpl-2.0.html>.
 This package is provided "as is" and without any express or implied
 warranties, including, without limitation, the implied warranties of
 merchantability and fitness for a particular purpose.
+
+=cut

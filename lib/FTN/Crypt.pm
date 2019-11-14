@@ -20,7 +20,53 @@ use 5.010;
 
 use base qw/FTN::Crypt::Error/;
 
+#----------------------------------------------------------------------#
+
+=head1 NAME
+
+FTN::Crypt - Encryption of the FTN messages.
+
+=head2 VERSION
+
+0.2.5
+
+=cut
+
 our $VERSION = '0.2.5';
+
+#----------------------------------------------------------------------#
+
+=head1 SYNOPSIS
+
+    use FTN::Crypt;
+
+    $cr = FTN::Crypt->new(
+        Nodelist => 'nodelist/NODELIST.*',
+    ) or die FTN::Crypt->error;
+    
+    $cr->encrypt_message(
+        Address => $ftn_address,
+        Message => $msg_raw,
+    ) or die $cr->error;
+
+=head1 DESCRIPTION
+
+The possibility of FTN netmail encryption may be sometimes a useful option.
+Corresponding nodelist flag was proposed in FSC-0073.
+
+Although current FidoNet Policy (version 4.07 dated June 9, 1989) clearly
+forbids routing of encrypted traffic without the express permission of
+all the links in the delivery system, it's still possible to deliver such
+messages directly. And, obviously, such routing may be allowed in FTN
+networks other than FidoNet.
+
+The proposed nodelist userflag is ENCRYPT:[TYPE], where [TYPE] is one of
+'PGP2', 'PGP5', 'GnuPG'. So encryption-capable node should have something
+like U,ENCRYPT:PGP5 in his nodelist record.
+
+=cut
+
+#----------------------------------------------------------------------#
 
 use FTN::Crypt::Constants;
 use FTN::Crypt::Msg;
@@ -35,11 +81,43 @@ use PGP::Finger;
 use Try::Tiny;
 
 #----------------------------------------------------------------------#
+
 my $DEFAULT_KEYSERVER_URL = 'https://zimmermann.mayfirst.org/pks/lookup';
 
 my $GPG2_BVER = '2.1.0';
 
 #----------------------------------------------------------------------#
+
+=head1 METHODS
+
+=cut
+
+#----------------------------------------------------------------------#
+
+=head2 new()
+
+Constructor.
+
+=head3 Parameters:
+
+=over 4
+
+=item * C<Nodelist>: Path to nodelist file. If contains wildcard, file with maximum number in digital extension will be selected.
+
+=back
+
+=head3 Returns:
+
+Created object or error in C<FTN::Crypt-E<gt>error>.
+
+Sample:
+
+    my $obj = FTN::Crypt->new(
+        Nodelist => 'NODELIST.*',
+    ) or die FTN::Crypt->error;
+
+=cut
+
 sub new {
     my ($class, %opts) = @_;
 
@@ -75,6 +153,34 @@ sub new {
 }
 
 #----------------------------------------------------------------------#
+
+=head2 encrypt_message()
+
+Message encryption.
+
+=head3 Parameters:
+
+=over 4
+
+=item * C<Address>: Recipient's FTN address.
+
+=item * C<Message>: Raw FTN message.
+
+=back
+
+=head3 Returns:
+
+Encrypted message or error in C<$obj-E<gt>error>.
+
+Sample:
+
+    my $res = $obj->encrypt_message(
+        Address => $ftn_address,
+        Message => $msg,
+    ) or die $obj->error;
+
+=cut
+
 sub encrypt_message {
     my $self = shift;
     my (%opts) = @_;
@@ -161,6 +267,37 @@ sub encrypt_message {
 }
 
 #----------------------------------------------------------------------#
+
+=head2 decrypt_message()
+
+Message decryption.
+
+=head3 Parameters:
+
+=over 4
+
+=item * C<Address>: Recipient's FTN address.
+
+=item * C<Message>: Raw FTN message.
+
+=item * C<Passphrase>: Key passphrase.
+
+=back
+
+=head3 Returns:
+
+Decrypted message or error in C<$obj-E<gt>error>.
+
+Sample:
+
+    my $res = $obj->decrypt_message(
+        Address => $ftn_address,
+        Message => $msg,
+        Passphrase => $pass,
+    ) or die $obj->error;
+
+=cut
+
 sub decrypt_message {
     my $self = shift;
     my (%opts) = @_;
@@ -258,6 +395,7 @@ sub decrypt_message {
 }
 
 #----------------------------------------------------------------------#
+
 sub _lookup_key {
     my $self = shift;
     my ($uid) = @_;
@@ -285,6 +423,7 @@ sub _lookup_key {
 }
 
 #----------------------------------------------------------------------#
+
 sub _import_key {
     my ($self, $uid) = @_;
 
@@ -298,6 +437,7 @@ sub _import_key {
                 PGP::Finger::Keyserver->new(
                     url => $self->{keyserver_url},
                 ),
+                # Now there are no PGP-related DNS records in fidonet.net zone
                 #~ PGP::Finger::DNS->new(
                     #~ dnssec => 1,
                     #~ rr_types => ['OPENPGPKEY', 'TYPE61'],
@@ -336,6 +476,7 @@ sub _import_key {
 }
 
 #----------------------------------------------------------------------#
+
 sub _select_key {
     my ($self, $uid) = @_;
 
@@ -359,6 +500,7 @@ sub _select_key {
 }
 
 #----------------------------------------------------------------------#
+
 sub _key_is_disabled {
     my ($self, $key) = @_;
 
@@ -366,6 +508,7 @@ sub _key_is_disabled {
 }
 
 #----------------------------------------------------------------------#
+
 sub _key_can_encrypt {
     my ($self, $key) = @_;
 
@@ -374,38 +517,6 @@ sub _key_can_encrypt {
 
 1;
 __END__
-
-=head1 NAME
-
-FTN::Crypt - Encryption of the FTN messages.
-
-=head1 SYNOPSIS
-
-    use FTN::Crypt;
-
-    $cr = FTN::Crypt->new(
-        Nodelist => 'nodelist/NODELIST.*',
-    );
-    
-    $cr->encrypt_message(
-        Address => $ftn_address,
-        Message => $msg_raw,
-    );
-
-=head1 DESCRIPTION
-
-The possibility of FTN netmail encryption may be sometimes a useful option.
-Corresponding nodelist flag was proposed in FSC-0073.
-
-Although current FidoNet Policy (version 4.07 dated June 9, 1989) clearly
-forbids routing of encrypted traffic without the express permission of
-all the links in the delivery system, it's still possible to deliver such
-messages directly. And, obviously, such routing may be allowed in FTN
-networks other than FidoNet.
-
-The proposed nodelist userflag is ENCRYPT:[TYPE], where [TYPE] is one of
-'PGP2', 'PGP5', 'GnuPG'. So encryption-capable node should have something
-like U,ENCRYPT:PGP5 in his nodelist record.
 
 =head1 AUTHOR
 
@@ -450,4 +561,3 @@ Manual install:
 =back 
 
 =cut
-(END)

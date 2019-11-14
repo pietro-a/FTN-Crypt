@@ -19,17 +19,6 @@ use warnings;
 use 5.010;
 
 #----------------------------------------------------------------------#
-our %ENC_METHODS = (
-    'PGP2' => 1,
-    'PGP5' => 1,
-    'GnuPG' => 1,
-);
-
-our $ENC_NODELIST_FLAG = 'ENCRYPT';
-our $ENC_MESSAGE_KLUDGE = 'ENC';
-
-1;
-__END__
 
 =head1 NAME
 
@@ -41,19 +30,33 @@ FTN::Crypt::Constants - Common constants for the L<FTN::Crypt> module.
 
     $FTN::Crypt::Constants::ENC_METHODS{PGP5}; # true
 
+=cut
+
+#----------------------------------------------------------------------#
+
 =head1 CONSTANTS
 
 =over 4
 
-=item * C<%ENC_METHODS> - supported encryption methods
+=item * C<%ENC_METHODS> - supported encryption methods.
 
-=item * C<$ENC_NODELIST_FLAG> - nodelist flag
+=item * C<$ENC_NODELIST_FLAG> - nodelist flag.
 
-=item * C<$ENC_MESSAGE_KLUDGE> - message encryption kludge
+=item * C<$ENC_MESSAGE_KLUDGE> - message encryption kludge.
 
-=head2 EXPORT
+=cut
 
-Nothing by default.
+our %ENC_METHODS = (
+    'PGP2' => 1,
+    'PGP5' => 1,
+    'GnuPG' => 1,
+);
+
+our $ENC_NODELIST_FLAG = 'ENCRYPT';
+our $ENC_MESSAGE_KLUDGE = 'ENC';
+
+1;
+__END__
 
 =head1 AUTHOR
 

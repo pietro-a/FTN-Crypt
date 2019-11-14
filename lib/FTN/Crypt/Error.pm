@@ -19,9 +19,31 @@ use warnings;
 use 5.010;
 
 #----------------------------------------------------------------------#
+
+=head1 NAME
+
+FTN::Crypt::Error - Error processing for the L<FTN::Crypt> module.
+
+=head1 USAGE
+
+Inherit your class from FTN::Crypt::Error. Then, to set error message:
+
+    Class->set_error($message)
+    $obj->set_error($message)
+
+To get error message:
+
+    Class->error
+    $obj->error
+
+=cut
+
+#----------------------------------------------------------------------#
+
 use vars qw/$_ERROR_/;
 
 #----------------------------------------------------------------------#
+
 sub new {
     return bless {
         _ERROR_ => '',
@@ -29,6 +51,7 @@ sub new {
 }
 
 #----------------------------------------------------------------------#
+
 sub set_error {
     my $self = shift;
 
@@ -41,6 +64,7 @@ sub set_error {
 }
 
 #----------------------------------------------------------------------#
+
 sub error {
     my $self = shift;
 
@@ -54,22 +78,6 @@ sub error {
 1;
 __END__
 
-=head1 NAME
-
-FTN::Crypt::Error - Error processing for the L<FTN::Crypt> module.
-
-=head1 USAGE
-
-    Class->set_error($message)
-    $obj->set_error($message)
- 
-Set error message.
- 
-    Class->error
-    $obj->error
- 
-Get error message.
- 
 =head1 AUTHOR
 
 Petr Antonov, E<lt>petr _at_ antonov _dot_ spaceE<gt>
