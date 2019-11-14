@@ -44,6 +44,8 @@ FTN::Crypt::Constants - Common constants for the L<FTN::Crypt> module.
 
 =item * C<$ENC_MESSAGE_KLUDGE> - message encryption kludge.
 
+=back
+
 =cut
 
 our %ENC_METHODS = (
