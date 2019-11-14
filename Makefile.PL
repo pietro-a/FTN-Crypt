@@ -3,7 +3,7 @@ use strict;
 use warnings;
 use ExtUtils::MakeMaker;
 
-my %WriteMakefileArgs =(
+my %WriteMakefileArgs = (
 	NAME             => 'FTN::Crypt',
 	VERSION_FROM     => 'lib/FTN/Crypt.pm',
 	ABSTRACT_FROM    => 'lib/FTN/Crypt.pm',
