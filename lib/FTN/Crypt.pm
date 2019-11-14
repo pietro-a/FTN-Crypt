@@ -104,6 +104,12 @@ Constructor.
 
 =item * C<Nodelist>: Path to nodelist file. If contains wildcard, file with maximum number in digital extension will be selected.
 
+=item * B<Optional> C<Keyserver> Keyserver (defaults to 'https://zimmermann.mayfirst.org/pks/lookup').
+
+=item * B<Optional> C<Pubring> Public keyring file.
+
+=item * B<Optional> C<Secring> Secret keyring file.
+
 =back
 
 =head3 Returns:
