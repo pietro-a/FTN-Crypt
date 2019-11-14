@@ -24,7 +24,7 @@ use 5.010;
 
 FTN::Crypt::Error - Error processing for the L<FTN::Crypt> module.
 
-=head1 USAGE
+=head1 SYNOPSIS
 
 Inherit your class from FTN::Crypt::Error. Then, to set error message:
 
@@ -44,6 +44,20 @@ use vars qw/$_ERROR_/;
 
 #----------------------------------------------------------------------#
 
+=head2 new()
+
+Constructor.
+
+=head3 Parameters:
+
+None.
+
+=head3 Returns:
+
+Created object.
+
+=cut
+
 sub new {
     return bless {
         _ERROR_ => '',
@@ -51,6 +65,24 @@ sub new {
 }
 
 #----------------------------------------------------------------------#
+
+=head2 set_error()
+
+Set error message.
+
+=head3 Parameters:
+
+=over 4
+
+=item * Error message.
+
+=back
+
+=head3 Returns:
+
+None.
+
+=cut
 
 sub set_error {
     my $self = shift;
@@ -64,6 +96,20 @@ sub set_error {
 }
 
 #----------------------------------------------------------------------#
+
+=head2 error()
+
+Get error message.
+
+=head3 Parameters:
+
+None.
+
+=head3 Returns:
+
+Error message.
+
+=cut
 
 sub error {
     my $self = shift;
