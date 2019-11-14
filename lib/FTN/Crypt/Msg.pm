@@ -30,15 +30,15 @@ FTN::Crypt::Msg - Message parsing for the L<FTN::Crypt> module.
 
     use FTN::Crypt::Msg;
 
-    my $msg = FTN::Crypt::Msg->new(
+    my $obj = FTN::Crypt::Msg->new(
         Address => $ftn_address,
-        Message => $msg_src,
+        Message => $msg,
     );
-    $msg->add_kludge('ENC: PGP5');
-    $msg->remove_kludge('ENC');
-    my $text = $msg->get_text;
-    my $kludges = $msg->get_kludges;
-    my $msg_raw = $msg->get_message;
+    $obj->add_kludge('ENC: PGP5');
+    $obj->remove_kludge('ENC');
+    my $text = $obj->get_text;
+    my $kludges = $obj->get_kludges;
+    my $msg_raw = $obj->get_message;
 
 =cut
 

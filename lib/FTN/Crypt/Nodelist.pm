@@ -30,11 +30,11 @@ FTN::Crypt::Nodelist - Nodelist processing for the L<FTN::Crypt> module.
 
     use FTN::Crypt::Nodelist;
 
-    my $ndl = FTN::Crypt::Nodelist->new(
+    my $obj = FTN::Crypt::Nodelist->new(
         Nodelist => 'nodelist/NODELIST.*',
         Username => 'user', # optional, defaults to 'sysop'
     );
-    my ($addr, $method) = $ndl->get_email_addr('2:5020/1');
+    my ($addr, $method) = $obj->get_email_addr('99:8877/1');
 
 =cut
 

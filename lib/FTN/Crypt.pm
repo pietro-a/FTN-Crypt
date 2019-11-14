@@ -40,14 +40,14 @@ our $VERSION = '0.2.5';
 
     use FTN::Crypt;
 
-    $cr = FTN::Crypt->new(
+    my $obj = FTN::Crypt->new(
         Nodelist => 'nodelist/NODELIST.*',
     ) or die FTN::Crypt->error;
     
-    $cr->encrypt_message(
+    $obj->encrypt_message(
         Address => $ftn_address,
         Message => $msg_raw,
-    ) or die $cr->error;
+    ) or die $obj->error;
 
 =head1 DESCRIPTION
 
