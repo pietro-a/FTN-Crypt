@@ -434,6 +434,7 @@ Manual install:
 
     $ perl Makefile.PL
     $ make
+    $ make test
     $ make install
 
 =head1 REFERENCES
