@@ -1,12 +1,143 @@
-FTN::Crypt is Copyright (C) 2019, Petr Antonov.
+NAME
 
-LICENSE INFORMATION
+    FTN::Crypt - Encryption of the FTN messages.
 
-This library is free software; you can redistribute it and/or modify it
-under the same terms as Perl 5.10.0. For more details, see the full text
-of the licenses at L<https://opensource.org/licenses/Artistic-1.0>, and
-L<http://www.gnu.org/licenses/gpl-2.0.html>.
+ VERSION
 
-This package is provided "as is" and without any express or implied
-warranties, including, without limitation, the implied warranties of
-merchantability and fitness for a particular purpose.
+    0.2.5
+
+SYNOPSIS
+
+        use FTN::Crypt;
+    
+        $cr = FTN::Crypt->new(
+            Nodelist => 'nodelist/NODELIST.*',
+        ) or die FTN::Crypt->error;
+        
+        $cr->encrypt_message(
+            Address => $ftn_address,
+            Message => $msg_raw,
+        ) or die $cr->error;
+
+DESCRIPTION
+
+    The possibility of FTN netmail encryption may be sometimes a useful
+    option. Corresponding nodelist flag was proposed in FSC-0073.
+
+    Although current FidoNet Policy (version 4.07 dated June 9, 1989)
+    clearly forbids routing of encrypted traffic without the express
+    permission of all the links in the delivery system, it's still possible
+    to deliver such messages directly. And, obviously, such routing may be
+    allowed in FTN networks other than FidoNet.
+
+    The proposed nodelist userflag is ENCRYPT:[TYPE], where [TYPE] is one
+    of 'PGP2', 'PGP5', 'GnuPG'. So encryption-capable node should have
+    something like U,ENCRYPT:PGP5 in his nodelist record.
+
+METHODS
+
+ new()
+
+    Constructor.
+
+  Parameters:
+
+      * Nodelist: Path to nodelist file. If contains wildcard, file with
+      maximum number in digital extension will be selected.
+
+  Returns:
+
+    Created object or error in FTN::Crypt->error.
+
+    Sample:
+
+        my $obj = FTN::Crypt->new(
+            Nodelist => 'NODELIST.*',
+        ) or die FTN::Crypt->error;
+
+ encrypt_message()
+
+    Message encryption.
+
+  Parameters:
+
+      * Address: Recipient's FTN address.
+
+      * Message: Raw FTN message.
+
+  Returns:
+
+    Encrypted message or error in $obj->error.
+
+    Sample:
+
+        my $res = $obj->encrypt_message(
+            Address => $ftn_address,
+            Message => $msg,
+        ) or die $obj->error;
+
+ decrypt_message()
+
+    Message decryption.
+
+  Parameters:
+
+      * Address: Recipient's FTN address.
+
+      * Message: Raw FTN message.
+
+      * Passphrase: Key passphrase.
+
+  Returns:
+
+    Decrypted message or error in $obj->error.
+
+    Sample:
+
+        my $res = $obj->decrypt_message(
+            Address => $ftn_address,
+            Message => $msg,
+            Passphrase => $pass,
+        ) or die $obj->error;
+
+AUTHOR
+
+    Petr Antonov, <petr@antonov.space>
+
+COPYRIGHT AND LICENSE
+
+    Copyright (C) 2019 by Petr Antonov
+
+    This library is free software; you can redistribute it and/or modify it
+    under the same terms as Perl 5.10.0. For more details, see the full
+    text of the licenses at https://opensource.org/licenses/Artistic-1.0,
+    and http://www.gnu.org/licenses/gpl-2.0.html.
+
+    This package is provided "as is" and without any express or implied
+    warranties, including, without limitation, the implied warranties of
+    merchantability and fitness for a particular purpose.
+
+INSTALLATION
+
+    Using cpan:
+
+        $ cpan FTN::Crypt
+
+    Manual install:
+
+        $ perl Makefile.PL
+        $ make
+        $ make test
+        $ make install
+
+REFERENCES
+
+    1 FidoNet Policy Document Version 4.07
+    <https://www.fidonet.org/policy4.txt>
+
+    2 FTS-5001 - Nodelist flags and userflags
+    <http://ftsc.org/docs/fts-5001.006>
+
+    3 FSC-0073 - Encrypted message identification for FidoNet *Draft I*
+    <http://ftsc.org/docs/fsc-0073.001>
+

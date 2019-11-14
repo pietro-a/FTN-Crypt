@@ -2,6 +2,13 @@
 
 FTN::Crypt - Encryption of the FTN messages.
 
+=head2 VERSION
+
+0.2.5
+
+
+=cut
+
 =head1 SYNOPSIS
 
     use FTN::Crypt;
@@ -10,15 +17,9 @@ FTN::Crypt - Encryption of the FTN messages.
         Nodelist => 'nodelist/NODELIST.*',
     ) or die FTN::Crypt->error;
     
-    $msg_enc = $cr->encrypt_message(
+    $cr->encrypt_message(
         Address => $ftn_address,
         Message => $msg_raw,
-    ) or die $cr->error;
-
-    $msg_dec = $cr->decrypt_message(
-        Address    => $ftn_address,
-        Message    => $msg_enc,
-        Passphrase => $passphrase,
     ) or die $cr->error;
 
 =head1 DESCRIPTION
@@ -35,6 +36,98 @@ networks other than FidoNet.
 The proposed nodelist userflag is ENCRYPT:[TYPE], where [TYPE] is one of
 'PGP2', 'PGP5', 'GnuPG'. So encryption-capable node should have something
 like U,ENCRYPT:PGP5 in his nodelist record.
+
+
+=cut
+
+=head1 METHODS
+
+
+=cut
+
+=head2 new()
+
+Constructor.
+
+=head3 Parameters:
+
+=over 4
+
+=item * C<Nodelist>: Path to nodelist file. If contains wildcard, file with maximum number in digital extension will be selected.
+
+=back
+
+=head3 Returns:
+
+Created object or error in C<FTN::Crypt-E<gt>error>.
+
+Sample:
+
+    my $obj = FTN::Crypt->new(
+        Nodelist => 'NODELIST.*',
+    ) or die FTN::Crypt->error;
+
+
+=cut
+
+=head2 encrypt_message()
+
+Message encryption.
+
+=head3 Parameters:
+
+=over 4
+
+=item * C<Address>: Recipient's FTN address.
+
+=item * C<Message>: Raw FTN message.
+
+=back
+
+=head3 Returns:
+
+Encrypted message or error in C<$obj-E<gt>error>.
+
+Sample:
+
+    my $res = $obj->encrypt_message(
+        Address => $ftn_address,
+        Message => $msg,
+    ) or die $obj->error;
+
+
+=cut
+
+=head2 decrypt_message()
+
+Message decryption.
+
+=head3 Parameters:
+
+=over 4
+
+=item * C<Address>: Recipient's FTN address.
+
+=item * C<Message>: Raw FTN message.
+
+=item * C<Passphrase>: Key passphrase.
+
+=back
+
+=head3 Returns:
+
+Decrypted message or error in C<$obj-E<gt>error>.
+
+Sample:
+
+    my $res = $obj->decrypt_message(
+        Address => $ftn_address,
+        Message => $msg,
+        Passphrase => $pass,
+    ) or die $obj->error;
+
+
+=cut
 
 =head1 AUTHOR
 
@@ -63,6 +156,7 @@ Manual install:
 
     $ perl Makefile.PL
     $ make
+    $ make test
     $ make install
 
 =head1 REFERENCES
