@@ -9,7 +9,7 @@ plan tests => 8;
 
 use FTN::Crypt;
 
-open my $fin, 't/data/msg.txt' or die $!;
+open my $fin, 't/data/msg.txt' or diag($!);
 binmode $fin;
 my $msg = <$fin>;
 close $fin;
