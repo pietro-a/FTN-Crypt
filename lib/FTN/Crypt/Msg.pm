@@ -38,7 +38,7 @@ FTN::Crypt::Msg - Message parsing for the L<FTN::Crypt> module.
     $obj->remove_kludge('ENC');
     my $text = $obj->get_text;
     my $kludges = $obj->get_kludges;
-    my $msg_raw = $obj->get_message;
+    my $msg = $obj->get_message;
 
 =cut
 
@@ -74,7 +74,7 @@ Constructor.
 
 =item * C<Address>: Recipient's FTN address.
 
-=item * C<Message>: Raw FTN message.
+=item * C<Message>: FTN message text with kludges.
 
 =back
 
@@ -413,7 +413,7 @@ sub set_text {
 
 =head2 get_message()
 
-Get raw message.
+Get FTN message text with kludges.
 
 =head3 Parameters:
 
@@ -421,7 +421,7 @@ None.
 
 =head3 Returns:
 
-Raw message or error in C<$obj-E<gt>error>.
+FTN message text with kludges or error in C<$obj-E<gt>error>.
 
 Sample:
 
@@ -447,13 +447,13 @@ sub get_message {
 
 =head2 set_message()
 
-Set raw message.
+Set FTN message text with kludges.
 
 =head3 Parameters:
 
 =over 4
 
-=item * Raw message.
+=item * FTN message text with kludges.
 
 =back
 

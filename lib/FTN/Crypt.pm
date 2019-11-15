@@ -46,7 +46,7 @@ our $VERSION = '0.2.5';
     
     $obj->encrypt_message(
         Address => $ftn_address,
-        Message => $msg_raw,
+        Message => $msg,
     ) or die $obj->error;
 
 =head1 DESCRIPTION
@@ -170,7 +170,7 @@ Message encryption.
 
 =item * C<Address>: Recipient's FTN address.
 
-=item * C<Message>: Raw FTN message.
+=item * C<Message>: FTN message text with kludges.
 
 =back
 
@@ -284,7 +284,7 @@ Message decryption.
 
 =item * C<Address>: Recipient's FTN address.
 
-=item * C<Message>: Raw FTN message.
+=item * C<Message>: FTN message text with kludges.
 
 =item * C<Passphrase>: Key passphrase.
 
