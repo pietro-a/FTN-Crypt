@@ -28,11 +28,11 @@ FTN::Crypt - Encryption of the FTN messages.
 
 =head2 VERSION
 
-0.2.5
+0.3.0
 
 =cut
 
-our $VERSION = '0.2.5';
+our $VERSION = '0.3.0';
 
 #----------------------------------------------------------------------#
 
