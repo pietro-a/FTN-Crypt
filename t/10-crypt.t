@@ -5,40 +5,52 @@ use warnings;
 use Test::LongString lcss => 0;
 use Test::More;
 
-plan tests => 8;
+plan tests => 9;
 
 use FTN::Crypt;
 
-open my $fin, 't/data/msg.txt' or diag($!);
+my $msg_file = 't/data/msg.txt';
+open my $fin, $msg_file or BAIL_OUT("Cannot open message file `$msg_file': $!");
 binmode $fin;
 my $msg = <$fin>;
 close $fin;
 
+# Test #1
 my $obj = new_ok('FTN::Crypt', [
     Nodelist => 't/data/nodelist.*',
     Pubring  => 't/data/pubring.gpg',
     Secring  => 't/data/secring.gpg',
-], 'Create FTN::Crypt object');
+], 'Create FTN::Crypt object') or BAIL_OUT(FTN::Crypt->error);
 
+# Test #2
+can_ok($obj, qw/encrypt_message decrypt_message/) or BAIL_OUT('Required methods are unsupported by FTN::Crypt');
+
+# Test #3
 my $encrypted = $obj->encrypt_message(
     Address => '99:8877/2',
     Message => $msg,
 );
-diag('Encryption error: ', $obj->error) unless defined $encrypted;
-isnt($encrypted, undef, 'Encryption');
+ok($encrypted, 'Encryption') or diag('Encryption error: ', $obj->error);
 
+# Test #4
 contains_string($encrypted, 'ENC: PGP5');
+
+# Test #5
 contains_string($encrypted, '-----BEGIN PGP MESSAGE-----');
 
+# Test #6
 my $decrypted = $obj->decrypt_message(
     Address => '99:8877/2',
     Message => $encrypted,
     Passphrase => 'test passphrase',
 );
-diag('Decryption error: ', $obj->error) unless defined $decrypted;
-isnt($decrypted, undef, 'Decryption');
+ok($decrypted, 'Decryption') or diag('Decryption error: ', $obj->error);
 
+# Test #7
 lacks_string($decrypted, 'ENC: PGP5');
+
+# Test #8
 lacks_string($decrypted, '-----BEGIN PGP MESSAGE-----');
 
+# Test #9
 is_string($decrypted, $msg, 'Decrypted is the same as original');
