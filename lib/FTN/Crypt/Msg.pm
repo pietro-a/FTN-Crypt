@@ -471,6 +471,11 @@ sub set_message {
     my $self = shift;
     my ($msg) = @_;
     
+    $self->{msg} = {
+        HEADER => [],
+        TEXT => '',
+        FOOTER => [],
+    };
     my @msg_lines = split /\r/, $msg;
     my $found_text = 0;
     my $finished = 0;
