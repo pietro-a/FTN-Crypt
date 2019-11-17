@@ -11,6 +11,67 @@
 # warranties, including, without limitation, the implied warranties of
 # merchantability and fitness for a particular purpose.
 #
+package FTN::Crypt::Msg::MsgChunk;
+
+sub new {
+    my $class = shift;
+
+    my $self = {
+        data => [],
+    };
+    
+    bless $self, $class;
+}
+
+sub get {
+    my $self = shift;
+    
+    return $self->{data};
+}
+
+sub set {
+    my $self = shift;
+    my ($line) = @_;
+    
+    push @{$self->{data}}, $line;
+}
+
+#----------------------------------------------------------------------#
+
+package FTN::Crypt::Msg::KludgeChunk;
+
+use base qw/FTN::Crypt::Msg::MsgChunk/;
+
+sub remove {
+    my $self = shift;
+    my ($kludge) = @_;
+    
+    if (defined $kludge && $kludge ne '') {
+        @{$self->{data}} = grep { !/^${kludge}(?::?\s.+)*$/ }
+                           @{$self->{data}};
+    } else {
+        return;
+    }
+
+    return 1;
+}
+
+#----------------------------------------------------------------------#
+
+package FTN::Crypt::Msg::TextChunk;
+
+use base qw/FTN::Crypt::Msg::MsgChunk/;
+
+sub get {
+    my $self = shift;
+    my ($ftn_ready) = @_;
+
+    my $sep = $ftn_ready ? "\r" : "\n";
+
+    return join $sep, @{$self->{data}};
+}
+
+#----------------------------------------------------------------------#
 
 package FTN::Crypt::Msg;
 
@@ -50,10 +111,13 @@ use FTN::Address;
 
 my $SOH = chr(1);
 
-my $DEFAULT_KLUDGE_AREA = 'HEADER';
-my %KLUDGE_AREAS = (
-    HEADER => 1,
-    FOOTER => 1,
+my %PREDEFINED_INDEX = (
+    'TOP'    => 0,
+    'BOTTOM' => -1,
+);
+my %DEFAULT_INDEX = (
+    KLUDGE => 'TOP',
+    TEXT   => 'BOTTOM',
 );
 
 #----------------------------------------------------------------------#
@@ -108,10 +172,10 @@ sub new {
     }
 
     my $self = {
-        msg => {
-            HEADER => [],
-            TEXT => '',
-            FOOTER => [],
+        msg => [],
+        idx => {
+            KLUDGE => [],
+            TEXT   => [],
         },
     };
 
@@ -135,7 +199,7 @@ sub _check_kludge {
     my $self = shift;
     my ($kludge) = @_;
 
-    unless (defined $kludge && $kludge ne "") {
+    unless (defined $kludge && $kludge ne '') {
         $self->set_error('Kludge is empty');
         return;
     }
@@ -145,17 +209,44 @@ sub _check_kludge {
 
 #----------------------------------------------------------------------#
 
-sub _check_area {
+sub _check_text {
     my $self = shift;
-    my ($area) = @_;
+    my ($text) = @_;
 
-    $area = $DEFAULT_KLUDGE_AREA unless defined $area;
-    unless ($KLUDGE_AREAS{$area}) {
-        $self->set_error("Invalid kludge area ($area)");
+    unless (defined $text && $text ne '') {
+        $self->set_error('Text is empty');
         return;
     }
 
-    return $area;
+    return $text;
+}
+
+#----------------------------------------------------------------------#
+
+sub _check_idx {
+    my $self = shift;
+    my ($type, $idx) = @_;
+
+    unless (grep /^$type$/, keys %{$self->{idx}}) {
+        $self->set_error("Invalid message area type (`$type')");
+        return;        
+    }
+
+    $idx = $DEFAULT_INDEX{$type} unless defined $idx;
+
+    $idx = $PREDEFINED_INDEX{$idx} if defined $PREDEFINED_INDEX{$idx};
+    
+    unless ($idx =~ /^-?\d+$/) {
+        $self->set_error("Invalid chunk index (`$idx')");
+        return;
+    }
+
+    unless (defined $self->{idx}->{$type}->[$idx]) {
+        $self->set_error("Invalid chunk index (`$idx')");
+        return;
+    }
+
+    return $idx;
 }
 
 #----------------------------------------------------------------------#
@@ -170,7 +261,7 @@ Add kludge to the message.
 
 =item * Kludge string.
 
-=item * B<Optional> C<[HEADER|FOOTER]> Whether to add kludge to the beginning or end of the message, defaults to HEADER.
+=item * B<Optional> C<[TOP|BOTTOM|<index>]> Kludges block, defaults to TOP.
 
 =back
 
@@ -186,13 +277,13 @@ Sample:
 
 sub add_kludge {
     my $self = shift;
-    my ($kludge, $area) = @_;
+    my ($kludge, $idx) = @_;
 
     $kludge = $self->_check_kludge($kludge);
-    $area = $self->_check_area($area);
+    $idx = $self->_check_idx('KLUDGE', $idx);
 
-    if (defined $kludge && defined $area) {
-        push @{$self->{msg}->{$area}}, $kludge;
+    if (defined $kludge && defined $idx) {
+        $self->{msg}->[$self->{idx}->{KLUDGE}->[$idx]]->set($kludge);
     } else {
         return;
     }
@@ -212,7 +303,7 @@ Remove kludge from the message.
 
 =item * Kludge string, may be only the first part of the composite kludge.
 
-=item * B<Optional> C<[HEADER|FOOTER]> Whether to remove kludge from the beginning or end of the message, defaults to HEADER.
+=item * B<Optional> C<[TOP|BOTTOM|<index>]> Kludges block, defaults to TOP.
 
 =back
 
@@ -228,14 +319,13 @@ Sample:
 
 sub remove_kludge {
     my $self = shift;
-    my ($kludge, $area) = @_;
+    my ($kludge, $idx) = @_;
 
     $kludge = $self->_check_kludge($kludge);
-    $area = $self->_check_area($area);
+    $idx = $self->_check_idx('KLUDGE', $idx);
 
-    if (defined $kludge && defined $area) {
-        @{$self->{msg}->{$area}} = grep { !/^${kludge}(?::?\s.+)*$/ }
-                                   @{$self->{msg}->{$area}};
+    if (defined $kludge && defined $idx) {
+        $self->{msg}->[$self->{idx}->{KLUDGE}->[$idx]]->remove($kludge);
     } else {
         return;
     }
@@ -251,11 +341,7 @@ Get message kludges.
 
 =head3 Parameters:
 
-=over 4
-
-=item * B<Optional> C<[HEADER|FOOTER]> Whether to get kludges from the beginning or end of the message, defaults to HEADER.
-
-=back
+None.
 
 =head3 Returns:
 
@@ -269,12 +355,13 @@ Sample:
 
 sub get_kludges {
     my $self = shift;
-    my ($area) = @_;
 
-    $area = $self->_check_area($area);
-    return unless $area;
+    my $kludges = [];
+    foreach my $c (@{$self->{msg}}) {
+        push @{$kludges}, $c->get if $c->isa('FTN::Crypt::Msg::KludgeChunk');
+    }
 
-    return $self->{msg}->{$area};
+    return $kludges;
 }
 
 #----------------------------------------------------------------------#
@@ -354,7 +441,11 @@ Get text part of the message.
 
 =head3 Parameters:
 
-None.
+=over 4
+
+=item * B<Optional> C<[TOP|BOTTOM|<index>]> Text block, defaults to BOTTOM.
+
+=back
 
 =head3 Returns:
 
@@ -368,10 +459,48 @@ Sample:
 
 sub get_text {
     my $self = shift;
+    my ($idx) = @_;
 
-    my $text = $self->{msg}->{TEXT};
-    $text =~ s/\r/\n/g;
-    
+    $idx = $self->_check_idx('TEXT', $idx);
+
+    my $text = '';
+    if (defined $idx) {
+        $text = $self->{msg}->[$self->{idx}->{TEXT}->[$idx]]->get;
+    } else {
+        return;
+    }
+
+    return $text;
+}
+
+#----------------------------------------------------------------------#
+
+=head2 get_all_text()
+
+Get all text parts of the message.
+
+=head3 Parameters:
+
+None.
+
+=head3 Returns:
+
+Arrayref with text parts of the message or error in C<$obj-E<gt>error>.
+
+Sample:
+
+    my $text = $obj->get_all_text() or die $obj->error;
+
+=cut
+
+sub get_all_text {
+    my $self = shift;
+
+    my $text = [];
+    foreach my $c (@{$self->{msg}}) {
+        push @{$text}, $c->get if $c->isa('FTN::Crypt::Msg::TextChunk');
+    }
+
     return $text;
 }
 
@@ -387,6 +516,8 @@ Set text part of the message.
 
 =item * Text part of the message.
 
+=item * B<Optional> C<[TOP|BOTTOM|<index>]> Text block, defaults to BOTTOM.
+
 =back
 
 =head3 Returns:
@@ -401,10 +532,22 @@ Sample:
 
 sub set_text {
     my $self = shift;
-    my ($text) = @_;
+    my ($text, $idx) = @_;
 
-    $text =~ s/\n/\r/g;
-    $self->{msg}->{TEXT} = $text;
+    $text = $self->_check_text($text);
+    $idx = $self->_check_idx('TEXT', $idx);
+
+    if (defined $text && defined $idx) {
+        $self->{msg}->[$self->{idx}->{TEXT}->[$idx]] = FTN::Crypt::Msg::TextChunk->new;
+        $text =~ s/\r\n/\r/g;
+        $text =~ s/\n/\r/g;
+        my @text_lines = split /\r/, $text;
+        foreach my $l (@text_lines) {
+            $self->{msg}->[$self->{idx}->{TEXT}->[$idx]]->set($l);
+        }
+    } else {
+        return;
+    }
 
     return 1;
 }
@@ -433,10 +576,13 @@ sub get_message {
     my $self = shift;
 
     my @msg;
-
-    push @msg, join "\r", map { "${SOH}$_" } @{$self->{msg}->{HEADER}};
-    push @msg, $self->{msg}->{TEXT};
-    push @msg, join "\r", map { "${SOH}$_" } @{$self->{msg}->{FOOTER}};
+    foreach my $c (@{$self->{msg}}) {
+        if ($c->isa('FTN::Crypt::Msg::KludgeChunk')) {
+            push @msg, join "\r", map { "${SOH}$_" } @{$c->get};
+        } elsif ($c->isa('FTN::Crypt::Msg::TextChunk')) {
+            push @msg, $c->get(1);
+        }
+    }
 
     my $msg_out = join "\r", @msg;
     
@@ -470,27 +616,33 @@ Sample:
 sub set_message {
     my $self = shift;
     my ($msg) = @_;
-    
-    $self->{msg} = {
-        HEADER => [],
-        TEXT => '',
-        FOOTER => [],
-    };
+
+    $self->{msg} = [];
+    foreach my $a (keys %{$self->{idx}}) {
+        $self->{idx}->{$a} = [];
+    }
+
+    $msg =~ s/\r\n/\r/g;
+    $msg =~ s/\n/\r/g;
     my @msg_lines = split /\r/, $msg;
-    my $found_text = 0;
-    my $finished = 0;
-    my @text;
+
+    my $is_kludge;
     foreach my $l (@msg_lines) {
         if ($l =~ s/^${SOH}//) {
-            my $block = $found_text ? 'FOOTER' : 'HEADER';
-            $finished = 1 if $found_text && !$finished;
-            push @{$self->{msg}->{$block}}, $l;
-        } elsif (!$finished) {
-            $found_text = 1 unless $found_text;
-            push @text, $l;
+            if (!defined $is_kludge || !$is_kludge) {
+                push @{$self->{msg}}, FTN::Crypt::Msg::KludgeChunk->new;
+                push @{$self->{idx}->{KLUDGE}}, $#{$self->{msg}};
+                $is_kludge = 1;
+            }
+        } else {
+            if (!defined $is_kludge || $is_kludge) {
+                push @{$self->{msg}}, FTN::Crypt::Msg::TextChunk->new;
+                push @{$self->{idx}->{TEXT}}, $#{$self->{msg}};
+                $is_kludge = 0;
+            }
         }
+        $self->{msg}->[-1]->set($l);
     }
-    $self->{msg}->{TEXT} = join "\r", @text;
 
     return 1;
 }

@@ -28,11 +28,11 @@ FTN::Crypt - Encryption of the FTN messages.
 
 =head2 VERSION
 
-0.3.0
+0.4.0
 
 =cut
 
-our $VERSION = '0.3.0';
+our $VERSION = '0.4.0';
 
 #----------------------------------------------------------------------#
 
@@ -329,8 +329,10 @@ sub decrypt_message {
     my $res;
 
     my $method_used;
-    foreach my $k (@{$msg->get_kludges}) {
-        $method_used = $1 if $k =~ /^$FTN::Crypt::Constants::ENC_MESSAGE_KLUDGE:\s+(\w+)$/;
+    foreach my $c (@{$msg->get_kludges}) {
+        foreach my $k (@{$c}) {
+            $method_used = $1 if $k =~ /^$FTN::Crypt::Constants::ENC_MESSAGE_KLUDGE:\s+(\w+)$/;
+        }
     }
     unless ($method_used) {
         $self->set_error('Message seems not to be encrypted');
