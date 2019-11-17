@@ -1,5 +1,8 @@
 Revision history for FTN::Crypt
 
+0.5     2019-11-18
+    [*] Add pointlist processing.
+
 0.4     2019-11-17
     [*] Rewrite message processing code.
 
