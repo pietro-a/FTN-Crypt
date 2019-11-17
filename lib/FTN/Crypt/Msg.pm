@@ -13,6 +13,10 @@
 #
 package FTN::Crypt::Msg::MsgChunk;
 
+use strict;
+use warnings;
+use v5.10.1;
+
 sub new {
     my $class = shift;
 
@@ -40,6 +44,10 @@ sub set {
 
 package FTN::Crypt::Msg::KludgeChunk;
 
+use strict;
+use warnings;
+use v5.10.1;
+
 use base qw/FTN::Crypt::Msg::MsgChunk/;
 
 sub remove {
@@ -60,6 +68,10 @@ sub remove {
 
 package FTN::Crypt::Msg::TextChunk;
 
+use strict;
+use warnings;
+use v5.10.1;
+
 use base qw/FTN::Crypt::Msg::MsgChunk/;
 
 sub get {
@@ -77,7 +89,7 @@ package FTN::Crypt::Msg;
 
 use strict;
 use warnings;
-use 5.010;
+use v5.10.1;
 
 use base qw/FTN::Crypt::Error/;
 

@@ -16,7 +16,7 @@ package FTN::Crypt::Constants;
 
 use strict;
 use warnings;
-use 5.010;
+use v5.10.1;
 
 #----------------------------------------------------------------------#
 
