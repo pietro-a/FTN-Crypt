@@ -23,7 +23,7 @@ my $obj = new_ok('FTN::Crypt', [
 ], 'Create FTN::Crypt object') or BAIL_OUT(FTN::Crypt->error);
 
 # Test #2
-can_ok($obj, qw/encrypt_message decrypt_message/) or BAIL_OUT('Required methods are unsupported by FTN::Crypt');
+can_ok($obj, qw/encrypt_message decrypt_message/, 'Has required methods') or BAIL_OUT('Required methods are unsupported by FTN::Crypt');
 
 # Test #3
 my $encrypted = $obj->encrypt_message(
@@ -33,10 +33,10 @@ my $encrypted = $obj->encrypt_message(
 ok($encrypted, 'Encryption') or diag('Encryption error: ', $obj->error);
 
 # Test #4
-contains_string($encrypted, 'ENC: PGP5');
+contains_string($encrypted, 'ENC: PGP5', 'Has ENC kludge');
 
 # Test #5
-contains_string($encrypted, '-----BEGIN PGP MESSAGE-----');
+contains_string($encrypted, '-----BEGIN PGP MESSAGE-----', 'Has PGP message');
 
 # Test #6
 my $decrypted = $obj->decrypt_message(
@@ -47,10 +47,10 @@ my $decrypted = $obj->decrypt_message(
 ok($decrypted, 'Decryption') or diag('Decryption error: ', $obj->error);
 
 # Test #7
-lacks_string($decrypted, 'ENC: PGP5');
+lacks_string($decrypted, 'ENC: PGP5', 'Has no ENC kludge');
 
 # Test #8
-lacks_string($decrypted, '-----BEGIN PGP MESSAGE-----');
+lacks_string($decrypted, '-----BEGIN PGP MESSAGE-----', 'Has no PGP message');
 
 # Test #9
 is_string($decrypted, $msg, 'Decrypted is the same as original');
