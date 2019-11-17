@@ -125,7 +125,8 @@ Sample:
 =cut
 
 sub new {
-    my ($class, %opts) = @_;
+    my $class = shift;
+    my (%opts) = @_;
 
     unless (%opts) {
         $class->set_error('No options specified');
