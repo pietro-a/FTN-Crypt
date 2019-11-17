@@ -4,20 +4,20 @@ NAME
 
  VERSION
 
-    0.2.5
+    0.4
 
 SYNOPSIS
 
         use FTN::Crypt;
     
-        $cr = FTN::Crypt->new(
+        my $obj = FTN::Crypt->new(
             Nodelist => 'nodelist/NODELIST.*',
         ) or die FTN::Crypt->error;
         
-        $cr->encrypt_message(
+        $obj->encrypt_message(
             Address => $ftn_address,
-            Message => $msg_raw,
-        ) or die $cr->error;
+            Message => $msg,
+        ) or die $obj->error;
 
 DESCRIPTION
 
@@ -45,6 +45,13 @@ METHODS
       * Nodelist: Path to nodelist file. If contains wildcard, file with
       maximum number in digital extension will be selected.
 
+      * Optional Keyserver Keyserver (defaults to
+      'https://zimmermann.mayfirst.org/pks/lookup').
+
+      * Optional Pubring Public keyring file.
+
+      * Optional Secring Secret keyring file.
+
   Returns:
 
     Created object or error in FTN::Crypt->error.
@@ -63,7 +70,7 @@ METHODS
 
       * Address: Recipient's FTN address.
 
-      * Message: Raw FTN message.
+      * Message: FTN message text with kludges.
 
   Returns:
 
@@ -84,7 +91,7 @@ METHODS
 
       * Address: Recipient's FTN address.
 
-      * Message: Raw FTN message.
+      * Message: FTN message text with kludges.
 
       * Passphrase: Key passphrase.
 
