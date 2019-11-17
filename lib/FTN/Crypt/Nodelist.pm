@@ -66,6 +66,8 @@ Constructor.
 
 =item * C<Nodelist>: Path to nodelist file. If contains wildcard, file with maximum number in digital extension will be selected.
 
+=item * B<Optional> C<Pointlist>: Path to pointlist file. If contains wildcard, file with maximum number in digital extension will be selected.
+
 =item * B<Optional> C<Username>: Username part in email address, which corresponds to the FTN one, defaults to 'sysop'.
 
 =back
@@ -104,6 +106,14 @@ sub new {
     unless ($self->{_nodelist}) {
         $class->set_error($@);
         return;
+    }
+
+    if ($opts{Pointlist}) {
+        $self->{_pointlist} = FTN::Nodelist->new(-file => $opts{Pointlist});
+        unless ($self->{_pointlist}) {
+            $class->set_error($@);
+            return;
+        }
     }
 
     if ($opts{Username}) {
@@ -151,7 +161,15 @@ sub get_email_addr {
         return;
     }
 
-    my $node = $self->{_nodelist}->getNode($ftn_addr);
+    my $addr = FTN::Address->new($ftn_addr);
+    unless ($addr) {
+        $self->set_error($@);
+        return;
+    }
+
+    my $search_list = ($ftn_addr =~ /^\d+:\d+\/\d+\.(\d+)(?:@\w+)?$/ && $1 && $self->{_pointlist}) ? '_pointlist' : '_nodelist';
+
+    my $node = $self->{$search_list}->getNode($ftn_addr);
     unless ($node) {
         $self->set_error($@);
         return;
@@ -166,12 +184,6 @@ sub get_email_addr {
     }
     unless ($FTN::Crypt::Constants::ENC_METHODS{$flags{$FTN::Crypt::Constants::ENC_NODELIST_FLAG}}) {
         $self->set_error("Unsupported encryption method ($flags{$FTN::Crypt::Constants::ENC_NODELIST_FLAG})");
-        return;
-    }
-    
-    my $addr = FTN::Address->new($node->address);
-    unless ($addr) {
-        $self->set_error($@);
         return;
     }
 

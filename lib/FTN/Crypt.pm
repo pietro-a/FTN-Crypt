@@ -104,6 +104,8 @@ Constructor.
 
 =item * C<Nodelist>: Path to nodelist file. If contains wildcard, file with maximum number in digital extension will be selected.
 
+=item * B<Optional> C<Pointlist>: Path to pointlist file. If contains wildcard, file with maximum number in digital extension will be selected.
+
 =item * B<Optional> C<Keyserver> Keyserver (defaults to 'https://zimmermann.mayfirst.org/pks/lookup').
 
 =item * B<Optional> C<Pubring> Public keyring file.
@@ -140,6 +142,7 @@ sub new {
 
     $self->{nodelist} = FTN::Crypt::Nodelist->new(
         Nodelist => $opts{Nodelist},
+        Pointlist => $opts{Pointlist},
     );
     unless ($self->{nodelist}) {
         $class->set_error(FTN::Crypt::Nodelist->error);
