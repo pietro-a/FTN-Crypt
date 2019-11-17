@@ -23,7 +23,7 @@ my $obj = new_ok('FTN::Crypt', [
 ], 'Create FTN::Crypt object') or BAIL_OUT(FTN::Crypt->error);
 
 # Test #2
-can_ok($obj, qw/encrypt_message decrypt_message/, 'Has required methods') or BAIL_OUT('Required methods are unsupported by FTN::Crypt');
+can_ok($obj, qw/encrypt_message decrypt_message/) or BAIL_OUT('Required methods are unsupported by FTN::Crypt');
 
 # Test #3
 my $encrypted = $obj->encrypt_message(
