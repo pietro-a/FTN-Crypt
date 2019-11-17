@@ -45,6 +45,9 @@ METHODS
       * Nodelist: Path to nodelist file. If contains wildcard, file with
       maximum number in digital extension will be selected.
 
+      * Optional Pointlist: Path to pointlist file. If contains wildcard,
+      file with maximum number in digital extension will be selected.
+
       * Optional Keyserver Keyserver (defaults to
       'https://zimmermann.mayfirst.org/pks/lookup').
 
