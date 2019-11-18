@@ -4,14 +4,17 @@ use strict;
 use warnings;
 use Test::More;
 
-plan tests => 8;
+plan tests => 10;
 
 use FTN::Crypt::Nodelist;
 
 # Test #1
 my $obj = new_ok('FTN::Crypt::Nodelist', [
     Nodelist => 't/data/nodelist.*',
-    Pointlist => 't/data/pointlist.*',
+    Pointlist => [
+        't/data/pointlist.*',
+        't/data/pointlist_zone66',
+    ],
     Username => 'user',
 ], 'Create FTN::Crypt::Nodelist object') or BAIL_OUT(FTN::Crypt::Nodelist->error);
 
@@ -39,3 +42,10 @@ is($addr4, '<user@p1.f1.n8877.z99.fidonet.net>', 'Get encryption-capable address
 
 # Test #8
 is($method4, 'GnuPG', 'Get encryption method #2');
+
+# Test #9
+my ($addr5, $method5) = $obj->get_email_addr('66:5544/1.1');
+is($addr4, '<user@p1.f1.n8877.z99.fidonet.net>', 'Get encryption-capable address #3');
+
+# Test #10
+is($method5, 'PGP5', 'Get encryption method #3');

@@ -18,7 +18,10 @@ close $fin;
 # Test #1
 my $obj = new_ok('FTN::Crypt', [
     Nodelist => 't/data/nodelist.*',
-    Pointlist => 't/data/pointlist.*',
+    Pointlist => [
+        't/data/pointlist.*',
+        't/data/pointlist_zone66',
+    ],
     Pubring  => 't/data/pubring.gpg',
     Secring  => 't/data/secring.gpg',
 ], 'Create FTN::Crypt object') or BAIL_OUT(FTN::Crypt->error);
