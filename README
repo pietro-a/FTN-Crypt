@@ -4,14 +4,18 @@ NAME
 
  VERSION
 
-    0.4
+    0.5
 
 SYNOPSIS
 
         use FTN::Crypt;
     
         my $obj = FTN::Crypt->new(
-            Nodelist => 'nodelist/NODELIST.*',
+            Nodelist => 'NODELIST.*',
+            Pointlist => [
+                'pointlist_1.*',
+                'pointlist_2',
+            ],
         ) or die FTN::Crypt->error;
         
         $obj->encrypt_message(
@@ -42,11 +46,13 @@ METHODS
 
   Parameters:
 
-      * Nodelist: Path to nodelist file. If contains wildcard, file with
-      maximum number in digital extension will be selected.
+      * Nodelist: Path to nodelist file(s), either scalar or arrayref. If
+      contains wildcard, file with maximum number in digital extension will
+      be selected.
 
-      * Optional Pointlist: Path to pointlist file. If contains wildcard,
-      file with maximum number in digital extension will be selected.
+      * Optional Pointlist: Path to pointlist file(s), either scalar or
+      arrayref. If contains wildcard, file with maximum number in digital
+      extension will be selected.
 
       * Optional Keyserver Keyserver (defaults to
       'https://zimmermann.mayfirst.org/pks/lookup').
@@ -63,6 +69,10 @@ METHODS
 
         my $obj = FTN::Crypt->new(
             Nodelist => 'NODELIST.*',
+            Pointlist => [
+                'pointlist_1.*',
+                'pointlist_2',
+            ],
         ) or die FTN::Crypt->error;
 
  encrypt_message()
