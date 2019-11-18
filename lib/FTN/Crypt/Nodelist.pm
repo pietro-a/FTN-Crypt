@@ -31,7 +31,11 @@ FTN::Crypt::Nodelist - Nodelist processing for the L<FTN::Crypt> module.
     use FTN::Crypt::Nodelist;
 
     my $obj = FTN::Crypt::Nodelist->new(
-        Nodelist => 'nodelist/NODELIST.*',
+        Nodelist => 'NODELIST.*',
+        Pointlist => [
+            'pointlist_1.*',
+            'pointlist_2',
+        ],
         Username => 'user', # optional, defaults to 'sysop'
     );
     my ($addr, $method) = $obj->get_email_addr('99:8877/1');
@@ -64,9 +68,9 @@ Constructor.
 
 =over 4
 
-=item * C<Nodelist>: Path to nodelist file. If contains wildcard, file with maximum number in digital extension will be selected.
+=item * C<Nodelist>: Path to nodelist file(s), either scalar or arrayref. If contains wildcard, file with maximum number in digital extension will be selected.
 
-=item * B<Optional> C<Pointlist>: Path to pointlist file. If contains wildcard, file with maximum number in digital extension will be selected.
+=item * B<Optional> C<Pointlist>: Path to pointlist file(s), either scalar or arrayref. If contains wildcard, file with maximum number in digital extension will be selected.
 
 =item * B<Optional> C<Username>: Username part in email address, which corresponds to the FTN one, defaults to 'sysop'.
 
@@ -79,7 +83,11 @@ Created object or error in C<FTN::Crypt::Nodelist-E<gt>error>.
 Sample:
 
     my $obj = FTN::Crypt::Nodelist->new(
-        Nodelist => 'nodelist/NODELIST.*',
+        Nodelist => 'NODELIST.*',
+        Pointlist => [
+            'pointlist_1.*',
+            'pointlist_2',
+        ],
         Username => 'user', # optional, defaults to 'sysop'
     );
 
@@ -102,17 +110,42 @@ sub new {
         _username => $DEFAULT_USERNAME,
     };
 
-    $self->{_nodelist} = FTN::Nodelist->new(-file => $opts{Nodelist});
-    unless ($self->{_nodelist}) {
-        $class->set_error($@);
+    $opts{Nodelist} = [$opts{Nodelist}] unless ref $opts{Nodelist};
+    unless (ref $opts{Nodelist} eq 'ARRAY') {
+        $class->set_error('Nodelist value error');
+        return;
+    }
+    unless (scalar @{$opts{Nodelist}}) {
+        $class->set_error('No nodelist specified');
         return;
     }
 
-    if ($opts{Pointlist}) {
-        $self->{_pointlist} = FTN::Nodelist->new(-file => $opts{Pointlist});
-        unless ($self->{_pointlist}) {
+    $self->{_nodelist} = [];
+    foreach my $nl_file (@{$opts{Nodelist}}) {
+        my $nl = FTN::Nodelist->new(-file => $nl_file);
+        unless ($nl) {
             $class->set_error($@);
             return;
+        }
+        push @{$self->{_nodelist}}, $nl;
+    }
+
+    if ($opts{Pointlist}) {
+        $opts{Pointlist} = [$opts{Pointlist}] unless ref $opts{Pointlist};
+        unless (ref $opts{Pointlist} eq 'ARRAY') {
+            $class->set_error('Pointlist value error');
+            return;
+        }
+        if (scalar @{$opts{Pointlist}}) {
+            $self->{_pointlist} = [];
+            foreach my $pl_file (@{$opts{Pointlist}}) {
+                my $pl = FTN::Nodelist->new(-file => $pl_file);
+                unless ($pl) {
+                    $class->set_error($@);
+                    return;
+                }
+                push @{$self->{_pointlist}}, $pl;
+            }
         }
     }
 
@@ -169,9 +202,13 @@ sub get_email_addr {
 
     my $search_list = ($ftn_addr =~ /^\d+:\d+\/\d+\.(\d+)(?:@\w+)?$/ && $1 && $self->{_pointlist}) ? '_pointlist' : '_nodelist';
 
-    my $node = $self->{$search_list}->getNode($ftn_addr);
+    my $node;
+    foreach my $list (@{$self->{$search_list}}) {
+        $node = $list->getNode($ftn_addr);
+        last if $node;
+    }
     unless ($node) {
-        $self->set_error($@);
+        $self->set_error('FTN address not found');
         return;
     }
 

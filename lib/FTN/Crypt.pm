@@ -41,7 +41,11 @@ our $VERSION = '0.5';
     use FTN::Crypt;
 
     my $obj = FTN::Crypt->new(
-        Nodelist => 'nodelist/NODELIST.*',
+        Nodelist => 'NODELIST.*',
+        Pointlist => [
+            'pointlist_1.*',
+            'pointlist_2',
+        ],
     ) or die FTN::Crypt->error;
     
     $obj->encrypt_message(
@@ -102,9 +106,9 @@ Constructor.
 
 =over 4
 
-=item * C<Nodelist>: Path to nodelist file. If contains wildcard, file with maximum number in digital extension will be selected.
+=item * C<Nodelist>: Path to nodelist file(s), either scalar or arrayref. If contains wildcard, file with maximum number in digital extension will be selected.
 
-=item * B<Optional> C<Pointlist>: Path to pointlist file. If contains wildcard, file with maximum number in digital extension will be selected.
+=item * B<Optional> C<Pointlist>: Path to pointlist file(s), either scalar or arrayref. If contains wildcard, file with maximum number in digital extension will be selected.
 
 =item * B<Optional> C<Keyserver> Keyserver (defaults to 'https://zimmermann.mayfirst.org/pks/lookup').
 
@@ -122,6 +126,10 @@ Sample:
 
     my $obj = FTN::Crypt->new(
         Nodelist => 'NODELIST.*',
+        Pointlist => [
+            'pointlist_1.*',
+            'pointlist_2',
+        ],
     ) or die FTN::Crypt->error;
 
 =cut
