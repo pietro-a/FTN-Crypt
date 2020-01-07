@@ -540,7 +540,7 @@ __END__
 
 =head1 AUTHOR
 
-Petr Antonov, E<lt>petr@antonov.spaceE<gt>
+Petr Antonov, E<lt>pietro@cpan.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 

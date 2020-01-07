@@ -126,7 +126,7 @@ __END__
 
 =head1 AUTHOR
 
-Petr Antonov, E<lt>petr _at_ antonov _dot_ spaceE<gt>
+Petr Antonov, E<lt>pietro@cpan.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
