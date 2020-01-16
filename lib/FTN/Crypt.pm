@@ -28,11 +28,11 @@ FTN::Crypt - Encryption of the FTN messages.
 
 =head2 VERSION
 
-0.5
+0.5.1
 
 =cut
 
-our $VERSION = '0.5';
+our $VERSION = '0.5.1';
 
 #----------------------------------------------------------------------#
 
@@ -47,7 +47,7 @@ our $VERSION = '0.5';
             'pointlist_2',
         ],
     ) or die FTN::Crypt->error;
-    
+
     $obj->encrypt_message(
         Address => $ftn_address,
         Message => $msg,
@@ -236,7 +236,7 @@ sub encrypt_message {
         $self->set_error("PGP key for $addr not found");
         return;
     }
-    
+
     my $key_id = $self->_select_key($addr);
     $self->{gnupg}->options->push_recipients($key_id);
 
@@ -258,7 +258,7 @@ sub encrypt_message {
     close $out_fh;
 
     close $err_fh;
-    
+
     waitpid $pid, 0;
 
     if ($msg_enc) {
@@ -270,7 +270,7 @@ sub encrypt_message {
             $self->set_error("Can't modify message kludges", $msg->error);
             return;
         }
-        
+
         $res = $msg->get_message;
         unless ($res) {
             $self->set_error("Can't get message", $msg->error);
@@ -368,7 +368,7 @@ sub decrypt_message {
 
     my ($in_fh, $out_fh, $err_fh, $pass_fh) = (IO::Handle->new(),
         IO::Handle->new(), IO::Handle->new(), IO::Handle->new());
-     
+
     my $handles = GnuPG::Handles->new(
         stdin      => $in_fh,
         stdout     => $out_fh,
@@ -383,7 +383,7 @@ sub decrypt_message {
 
     print $in_fh $msg->get_text;
     close $in_fh;
-    
+
     my $msg_dec = join '', <$out_fh>;
     close $out_fh;
 
@@ -419,9 +419,9 @@ sub decrypt_message {
 sub _lookup_key {
     my $self = shift;
     my ($uid) = @_;
-    
+
     my ($out_fh, $err_fh) = (IO::Handle->new(), IO::Handle->new());
-     
+
     my $handles = GnuPG::Handles->new(
         stdout => $out_fh,
         stderr => $err_fh,
@@ -472,7 +472,7 @@ sub _import_key {
     if ($res) {
         my ($in_fh, $out_fh, $err_fh) = (IO::Handle->new(),
              IO::Handle->new(), IO::Handle->new());
-         
+
         my $handles = GnuPG::Handles->new(
             stdin  => $in_fh,
             stdout => $out_fh,
@@ -515,7 +515,7 @@ sub _select_key {
     @keys = map { '0x' . substr $_->[1], -8 }
             sort { $b->[0] <=> $a->[0] }
             @keys;
-    
+
     return $keys[0];
 }
 
@@ -578,6 +578,6 @@ Manual install:
 
 =item 3 L<FSC-0073 - Encrypted message identification for FidoNet *Draft I*|http://ftsc.org/docs/fsc-0073.001>
 
-=back 
+=back
 
 =cut

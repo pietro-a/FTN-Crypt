@@ -4,7 +4,7 @@ FTN::Crypt - Encryption of the FTN messages.
 
 =head2 VERSION
 
-0.5
+0.5.1
 
 
 =cut
@@ -20,7 +20,7 @@ FTN::Crypt - Encryption of the FTN messages.
             'pointlist_2',
         ],
     ) or die FTN::Crypt->error;
-    
+
     $obj->encrypt_message(
         Address => $ftn_address,
         Message => $msg,
@@ -185,7 +185,7 @@ Manual install:
 
 =item 3 L<FSC-0073 - Encrypted message identification for FidoNet *Draft I*|http://ftsc.org/docs/fsc-0073.001>
 
-=back 
+=back
 
 
 =cut

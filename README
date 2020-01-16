@@ -4,12 +4,12 @@ NAME
 
  VERSION
 
-    0.5
+    0.5.1
 
 SYNOPSIS
 
         use FTN::Crypt;
-    
+
         my $obj = FTN::Crypt->new(
             Nodelist => 'NODELIST.*',
             Pointlist => [
@@ -17,7 +17,7 @@ SYNOPSIS
                 'pointlist_2',
             ],
         ) or die FTN::Crypt->error;
-        
+
         $obj->encrypt_message(
             Address => $ftn_address,
             Message => $msg,

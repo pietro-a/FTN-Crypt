@@ -1,5 +1,8 @@
 Revision history for FTN::Crypt
 
+0.5.1   2020-01-16
+    [*] Tidied up MANIFEST.SKIP as suggested by CPANTS.
+
 0.5     2019-11-18
     [*] Add pointlist processing.
     [*] Multiple node- and pointlists.
